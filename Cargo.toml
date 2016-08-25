@@ -1,0 +1,21 @@
+[package]
+name = "fractal-api"
+version = "0.0.1-dev"
+authors = [
+    "Iban Eguia <iban@fractal.global>",
+    "Eric Remigino <eric@fractal.global>",
+]
+license = "MIT/Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/FractalGlobal/api-rs"
+documentation = "http://fractal.global/api-rs"
+description = """
+Fractal Global Credits API client library
+"""
+keywords = ["fractal", "global", "credits", "api"]
+
+[dependencies]
+hyper = "0.9"
+chrono = "0.2"
+rustc-serialize = "0.3"
+fractal-dto = "0.0.5"
