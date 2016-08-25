@@ -1,3 +1,4 @@
+use std::fmt;
 use std::str::FromStr;
 use std::slice::Iter;
 use std::result::Result as StdResult;
@@ -101,6 +102,12 @@ pub enum Scope {
     /// This scope is used for administration purposes, and will not be enabled for public
     /// development accounts.
     Developer,
+}
+
+impl fmt::Display for Scope {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }
 
 impl FromStr for Scope {
