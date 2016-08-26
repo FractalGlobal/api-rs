@@ -18,8 +18,7 @@ use std::time::Duration;
 use std::io::Read;
 
 use hyper::Client as HyperClient;
-use hyper::client::IntoUrl;
-use hyper::header::{Headers, Authorization, Accept, qitem};
+use hyper::header::{Headers, Authorization, Basic, Accept, qitem};
 use hyper::mime::{Mime, TopLevel, SubLevel, Attr, Value};
 use hyper::status::StatusCode;
 use rustc_serialize::base64::FromBase64;
@@ -35,7 +34,7 @@ use types::User;
 use oauth::{AccessToken, Scope};
 
 /// Application's secret length.
-pub const SECRET_LEN: usize = 32;
+pub const SECRET_LEN: usize = 20;
 
 const FRACTAL_SERVER: &'static str = "https://api.fractal.global/";
 const FRACTAL_DEV_SERVER: &'static str = "https://dev.fractal.global/";
@@ -53,7 +52,7 @@ impl ClientV1 {
     pub fn new() -> ClientV1 {
         ClientV1 {
             client: hyper::Client::new(),
-            url: format!("{}/v1/", FRACTAL_SERVER),
+            url: format!("{}v1/", FRACTAL_SERVER),
         }
     }
 
@@ -61,7 +60,7 @@ impl ClientV1 {
     pub fn new_with_url<S: AsRef<str>>(url: S) -> ClientV1 {
         ClientV1 {
             client: hyper::Client::new(),
-            url: format!("{}/v1/", url.as_ref()),
+            url: format!("{}v1/", url.as_ref()),
         }
     }
 
@@ -69,7 +68,7 @@ impl ClientV1 {
     pub fn new_dev() -> ClientV1 {
         ClientV1 {
             client: hyper::Client::new(),
-            url: format!("{}/v1/", FRACTAL_DEV_SERVER),
+            url: format!("{}v1/", FRACTAL_DEV_SERVER),
         }
     }
 
@@ -84,7 +83,7 @@ impl ClientV1 {
     }
 
     /// Gets a token from the API.
-    pub fn token<S: AsRef<str>>(&self, app_id: S, secret: S) -> Result<AccessToken> {
+    pub fn token<S: AsRef<str>>(&mut self, app_id: S, secret: S) -> Result<AccessToken> {
         match secret.as_ref().from_base64() {
             Ok(b) => {
                 if b.len() == SECRET_LEN {
@@ -96,19 +95,22 @@ impl ClientV1 {
                         ])
                     );
                     headers.set(
-                        Authorization(format!("Basic {}:{}", app_id.as_ref(), secret.as_ref()))
+                        Authorization(Basic {username: String::from(app_id.as_ref()), password: Some(String::from(secret.as_ref())) })
                     );
                     let mut response = try!(self.client
-                        .get(&format!("{}/token", self.url))
+                        .post(&format!("{}token", self.url))
                         .body("grant_type=client_credentials")
-                        .headers(headers).send());
+                        .headers(headers.clone()).send());
+
                     match response.status {
                         StatusCode::Ok => {
                             let mut response_str = String::new();
                             try!(response.read_to_string(&mut response_str));
+                            self.client = HyperClient::new();
                             Ok(try!(AccessToken::from_dto(try!(json::decode(&response_str)))))
                         },
-                        _ => Err(Error::Unauthorized),
+                        StatusCode::Unauthorized => Err(Error::Unauthorized),
+                        _ => Err(Error::ServerError),
                     }
                 } else {
                     Err(Error::InvalidSecret)
@@ -122,7 +124,7 @@ impl ClientV1 {
     pub fn get_all_users(&self, access_token: AccessToken) -> Result<Vec<User>> {
         if access_token.scopes().any(|s| s == &Scope::Admin) && !access_token.has_expired() {
             let response = try!(self.client
-                .get(&format!("{}/get_all_users", self.url))
+                .get(&format!("{}get_all_users", self.url))
                 .header(Authorization(format!("{} {}",
                                               access_token.get_token_type(),
                                               access_token.as_str())))
