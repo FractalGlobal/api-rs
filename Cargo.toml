@@ -1,6 +1,6 @@
 [package]
 name = "fractal-api"
-version = "0.0.4"
+version = "0.0.5"
 authors = [
     "Iban Eguia <iban@fractal.global>",
     "Eric Remigino <eric@fractal.global>",
@@ -16,6 +16,7 @@ keywords = ["fractal", "global", "credits", "api"]
 
 [dependencies]
 hyper = "^0.9"
-chrono = "^0.2"
+chrono = { version = "^0.2", features = ["rustc-serialize"]}
 rustc-serialize = "^0.3"
 fractal-dto = "^0.0"
+fractal-utils = "^0.1"
