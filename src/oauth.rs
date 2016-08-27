@@ -3,6 +3,7 @@ use std::str::FromStr;
 use std::slice::Iter;
 use std::result::Result as StdResult;
 
+use hyper::header::Bearer;
 use chrono::{Duration, UTC, DateTime};
 
 use dto::{FromDTO, AccessTokenDTO, TokenTypeDTO, FromDTOError};
@@ -18,14 +19,13 @@ pub struct AccessToken {
     app_id: String,
     scopes: Vec<Scope>,
     access_token: String,
-    token_type: TokenType,
     expiration: DateTime<UTC>,
 }
 
 impl AccessToken {
     /// Creates an access token from stored data.
-    pub fn from_data(app_id: String, scopes: Vec<Scope>, access_token: String, token_type: TokenTypeDTO, expiration: DateTime<UTC>) -> AccessToken {
-        AccessToken {app_id: app_id, scopes: scopes, access_token: access_token, token_type: token_type, expiration: expiration}
+    pub fn from_data(app_id: String, scopes: Vec<Scope>, access_token: String, expiration: DateTime<UTC>) -> AccessToken {
+        AccessToken { app_id: app_id, scopes: scopes, access_token: access_token, expiration: expiration }
     }
 
     /// Gets the application ID of the token.
@@ -38,16 +38,9 @@ impl AccessToken {
         self.scopes.iter()
     }
 
-    /// Gets the token as a string.
-    ///
-    /// This string will be the one that identifies the client in the API.
-    pub fn as_str(&self) -> &str {
-        &self.access_token
-    }
-
-    /// Gets the type of the token.
-    pub fn get_token_type(&self) -> TokenType {
-        self.token_type
+    /// Gets the token to be sent
+    pub fn get_token(&self) -> Bearer {
+        Bearer { token: self.access_token.clone() }
     }
 
     /// Gets the expiration time of the token.
@@ -63,19 +56,22 @@ impl AccessToken {
 
 impl FromDTO<AccessTokenDTO> for AccessToken {
     fn from_dto(dto: AccessTokenDTO) -> StdResult<AccessToken, FromDTOError> {
+        if dto.token_type != TokenTypeDTO::Bearer {
+            return Err(FromDTOError::new("the token type of the access token is not valid"));
+        }
         let mut scopes = Vec::new();
         for scope in dto.scopes.split(',') {
             scopes.push(match Scope::from_str(scope) {
                 Ok(s) => s,
-                Err(_) => return Err(FromDTOError {}),
+                Err(_) => return Err(FromDTOError::new("the access token contained an invalid scope")),
             });
         }
         if scopes.len() == 0 {
-            return Err(FromDTOError {});
+            return Err(FromDTOError::new("there were no scopes in the access token"));
         }
         let expiry_time = UTC::now() + Duration::seconds(dto.expiration);
 
-        Ok(AccessToken {app_id: dto.app_id, scopes: scopes, access_token: dto.access_token, token_type: dto.token_type, expiration: expiry_time})
+        Ok(AccessToken { app_id: dto.app_id, scopes: scopes, access_token: dto.access_token, expiration: expiry_time })
     }
 }
 

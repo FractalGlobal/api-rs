@@ -18,4 +18,4 @@ keywords = ["fractal", "global", "credits", "api"]
 hyper = "^0.9"
 chrono = "^0.2"
 rustc-serialize = "^0.3"
-fractal-dto = "0.0.5"
+fractal-dto = "^0.0"

@@ -18,7 +18,7 @@ use std::time::Duration;
 use std::io::Read;
 
 use hyper::Client as HyperClient;
-use hyper::header::{Headers, Authorization, Basic, Accept, qitem};
+use hyper::header::{Headers, Authorization, Basic, Accept, qitem, Connection, ConnectionOption};
 use hyper::mime::{Mime, TopLevel, SubLevel, Attr, Value};
 use hyper::status::StatusCode;
 use rustc_serialize::base64::FromBase64;
@@ -97,16 +97,16 @@ impl ClientV1 {
                     headers.set(
                         Authorization(Basic {username: String::from(app_id.as_ref()), password: Some(String::from(secret.as_ref())) })
                     );
+                    headers.set(Connection(vec![ConnectionOption::Close]));
                     let mut response = try!(self.client
                         .post(&format!("{}token", self.url))
                         .body("grant_type=client_credentials")
-                        .headers(headers.clone()).send());
+                        .headers(headers).send());
 
                     match response.status {
                         StatusCode::Ok => {
                             let mut response_str = String::new();
                             try!(response.read_to_string(&mut response_str));
-                            self.client = HyperClient::new();
                             Ok(try!(AccessToken::from_dto(try!(json::decode(&response_str)))))
                         },
                         StatusCode::Unauthorized => Err(Error::Unauthorized),
@@ -123,13 +123,24 @@ impl ClientV1 {
     /// Gets all users from the database.
     pub fn get_all_users(&self, access_token: AccessToken) -> Result<Vec<User>> {
         if access_token.scopes().any(|s| s == &Scope::Admin) && !access_token.has_expired() {
-            let response = try!(self.client
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            headers.set(Connection(vec![ConnectionOption::Close]));
+            let mut response = try!(self.client
                 .get(&format!("{}get_all_users", self.url))
-                .header(Authorization(format!("{} {}",
-                                              access_token.get_token_type(),
-                                              access_token.as_str())))
+                .headers(headers)
                 .send());
-            unimplemented!()
+            match response.status {
+                StatusCode::Ok => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    // let dto_users = User
+                    // Ok(try!(AccessToken::from_dto(try!(json::decode(&response_str)))))
+                    unimplemented!();
+                },
+                StatusCode::Unauthorized => Err(Error::Unauthorized),
+                _ => Err(Error::ServerError),
+            }
         } else {
             Err(Error::Unauthorized)
         }
