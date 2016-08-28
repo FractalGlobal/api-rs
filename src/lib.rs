@@ -102,7 +102,6 @@ impl ClientV1 {
                         username: String::from(app_id.as_ref()),
                         password: Some(String::from(secret.as_ref())),
                     }));
-                    headers.set(Connection(vec![ConnectionOption::Close]));
                     let mut response = try!(self.client
                         .post(&format!("{}token", self.url))
                         .body("grant_type=client_credentials")
@@ -132,7 +131,6 @@ impl ClientV1 {
         if access_token.scopes().any(|s| s == &Scope::Admin) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            headers.set(Connection(vec![ConnectionOption::Close]));
             let mut response = try!(self.client
                 .get(&format!("{}all_users", self.url))
                 .headers(headers)
@@ -165,7 +163,6 @@ impl ClientV1 {
         if access_token.scopes().any(|s| s == &Scope::Admin) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            headers.set(Connection(vec![ConnectionOption::Close]));
             let mut response = try!(self.client
                 .get(&format!("{}all_transactions/{}", self.url, first_transaction))
                 .headers(headers)
@@ -198,7 +195,6 @@ impl ClientV1 {
         }) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            headers.set(Connection(vec![ConnectionOption::Close]));
             let dto: GenerateTransaction = GenerateTransaction {
                 origin_id: access_token.scopes().fold(0, |acc, s| match s {
                     &Scope::User(id) => id,
@@ -237,7 +233,6 @@ impl ClientV1 {
         if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            headers.set(Connection(vec![ConnectionOption::Close]));
             let dto: Login = Login {
                 username: String::from(username.as_ref()),
                 password: String::from(password.as_ref()),
@@ -271,7 +266,6 @@ impl ClientV1 {
         if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            headers.set(Connection(vec![ConnectionOption::Close]));
             let register: Register = Register {
                 username: String::from(username.as_ref()),
                 password: String::from(password.as_ref()),
@@ -309,7 +303,6 @@ impl ClientV1 {
         }) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            headers.set(Connection(vec![ConnectionOption::Close]));
             let dto: UpdateUser = UpdateUser {
                 new_username: Some(String::from(username.as_ref())),
                 new_email: None,
@@ -361,7 +354,6 @@ impl ClientV1 {
         }) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            headers.set(Connection(vec![ConnectionOption::Close]));
             let dto: UpdateUser = UpdateUser {
                 new_username: None,
                 new_email: None,
@@ -413,7 +405,6 @@ impl ClientV1 {
         }) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            headers.set(Connection(vec![ConnectionOption::Close]));
             let dto: UpdateUser = UpdateUser {
                 new_username: None,
                 new_email: None,
@@ -466,7 +457,6 @@ impl ClientV1 {
         }) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            headers.set(Connection(vec![ConnectionOption::Close]));
             let dto: UpdateUser = UpdateUser {
                 new_username: None,
                 new_email: None,
@@ -519,7 +509,6 @@ impl ClientV1 {
         }) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            headers.set(Connection(vec![ConnectionOption::Close]));
             let dto: UpdateUser = UpdateUser {
                 new_username: None,
                 new_email: Some(String::from(email.as_ref())),
@@ -571,7 +560,6 @@ impl ClientV1 {
         }) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            headers.set(Connection(vec![ConnectionOption::Close]));
             let dto: UpdateUser = UpdateUser {
                 new_username: None,
                 new_email: None,
@@ -623,7 +611,6 @@ impl ClientV1 {
         }) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            headers.set(Connection(vec![ConnectionOption::Close]));
             let dto: UpdateUser = UpdateUser {
                 new_username: None,
                 new_email: None,
@@ -678,7 +665,6 @@ impl ClientV1 {
         }) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            headers.set(Connection(vec![ConnectionOption::Close]));
             let dto: UpdateUser = UpdateUser {
                 new_username: None,
                 new_email: None,
@@ -729,7 +715,6 @@ impl ClientV1 {
         }) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            headers.set(Connection(vec![ConnectionOption::Close]));
             let dto: ConnectionInvitation = ConnectionInvitation {
                 origin_id:  access_token.scopes().fold(0, |acc, s| match s {
                      &Scope::User(id) => id,
@@ -773,7 +758,6 @@ impl ClientV1 {
         }) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            headers.set(Connection(vec![ConnectionOption::Close]));
             let dto: ConfirmConnection = ConfirmConnection {
                 origin:  user,
                  destination: access_token.scopes().fold(0, |acc, s| match s {
