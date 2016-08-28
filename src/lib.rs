@@ -24,7 +24,8 @@ use hyper::mime::{Mime, TopLevel, SubLevel, Attr, Value};
 use hyper::status::StatusCode;
 use rustc_serialize::base64::FromBase64;
 use rustc_serialize::json;
-use dto::{FromDTO, UserDTO, ScopeDTO as Scope, GenerateTransactionDTO as GenerateTransaction, LoginDTO as Login, RegisterDTO as Register};
+use dto::{FromDTO, UserDTO, ScopeDTO as Scope, GenerateTransactionDTO as GenerateTransaction,
+          LoginDTO as Login, RegisterDTO as Register, UpdateUserDTO as UpdateUser};
 
 pub mod error;
 pub mod types;
@@ -125,7 +126,7 @@ impl ClientV1 {
     }
 
     /// Gets all users from the database.
-    pub fn get_all_users(&self, access_token: AccessToken) -> Result<Vec<User>> {
+    pub fn get_all_users(&self, access_token: &AccessToken) -> Result<Vec<User>> {
         if access_token.scopes().any(|s| s == &Scope::Admin) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
@@ -139,10 +140,12 @@ impl ClientV1 {
                     let mut response_str = String::new();
                     try!(response.read_to_string(&mut response_str));
                     let dto_users: Vec<UserDTO> = try!(json::decode(&response_str));
-                    Ok(dto_users.into_iter().filter_map(|u| match User::from_dto(u) {
-                        Ok(u) => Some(u),
-                        Err(_) => None,
-                    }).collect())
+                    Ok(dto_users.into_iter()
+                        .filter_map(|u| match User::from_dto(u) {
+                            Ok(u) => Some(u),
+                            Err(_) => None,
+                        })
+                        .collect())
                 }
                 StatusCode::Unauthorized => Err(Error::Unauthorized),
                 _ => Err(Error::ServerError),
@@ -153,7 +156,10 @@ impl ClientV1 {
     }
 
     /// Gets all the transactions since the given transaction
-    pub fn get_all_transactions(&self, access_token: AccessToken, first_transaction: u64) -> Result<Vec<Transaction>> {
+    pub fn get_all_transactions(&self,
+                                access_token: &AccessToken,
+                                first_transaction: u64)
+                                -> Result<Vec<Transaction>> {
         if access_token.scopes().any(|s| s == &Scope::Admin) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
@@ -178,12 +184,28 @@ impl ClientV1 {
     }
 
     /// Generates a transaction
-    pub fn generate_transaction(&self, access_token: AccessToken, receiver_wallet: WalletAddress, receiver_id: u64, amount: Amount) -> Result<()> {
-        if access_token.scopes().any(|s| match s {&Scope::User(_) => true, _ => false}) && !access_token.has_expired() {
+    pub fn generate_transaction(&self,
+                                access_token: &AccessToken,
+                                receiver_wallet: WalletAddress,
+                                receiver_id: u64,
+                                amount: Amount)
+                                -> Result<()> {
+        if access_token.scopes().any(|s| match s {
+            &Scope::User(_) => true,
+            _ => false,
+        }) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             headers.set(Connection(vec![ConnectionOption::Close]));
-            let dto: GenerateTransaction = GenerateTransaction {origin_id: access_token.scopes().fold(0, |acc, s| match s {&Scope::User(id) => id, _ => acc}), destination_address: receiver_wallet, destination_id: receiver_id, amount: amount};
+            let dto: GenerateTransaction = GenerateTransaction {
+                origin_id: access_token.scopes().fold(0, |acc, s| match s {
+                    &Scope::User(id) => id,
+                    _ => acc,
+                }),
+                destination_address: receiver_wallet,
+                destination_id: receiver_id,
+                amount: amount,
+            };
             let mut response = try!(self.client
                 .post(&format!("{}generate_transaction", self.url))
                 .body(&json::encode(&dto).unwrap())
@@ -191,8 +213,9 @@ impl ClientV1 {
                 .send());
             match response.status {
                 StatusCode::Ok => {
-                    let mut response_str = String::new();
-                    try!(response.read_to_string(&mut response_str));
+                    // let mut response_str = String::new();
+                    // try!(response.read_to_string(&mut response_str));
+                    // TODO read message and return error or success
                     Ok(())
                 }
                 StatusCode::Unauthorized => Err(Error::Unauthorized),
@@ -204,12 +227,19 @@ impl ClientV1 {
     }
 
     /// Logs the user in
-    pub fn login<S: AsRef<str>>(&self, access_token: AccessToken, username: S, password: S) -> Result<AccessToken> {
+    pub fn login<S: AsRef<str>>(&self,
+                                access_token: &AccessToken,
+                                username: S,
+                                password: S)
+                                -> Result<AccessToken> {
         if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             headers.set(Connection(vec![ConnectionOption::Close]));
-            let dto: Login = Login {username: String::from(username.as_ref()), password: String::from(password.as_ref())};
+            let dto: Login = Login {
+                username: String::from(username.as_ref()),
+                password: String::from(password.as_ref()),
+            };
             let mut response = try!(self.client
                 .post(&format!("{}login", self.url))
                 .body(&json::encode(&dto).unwrap())
@@ -229,28 +259,97 @@ impl ClientV1 {
         }
     }
 
-    // /// Logs the user in
-    // pub fn register<S: AsRef<str>>(&self, access_token: AccessToken, username: S, password: S, email: S) -> Result<()> {
-    //     if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
-    //         let mut headers = Headers::new();
-    //         headers.set(Authorization(access_token.get_token()));
-    //         headers.set(Connection(vec![ConnectionOption::Close]));
-    //         let mut response = try!(self.client
-    //             .post(&format!("{}register", self.url))
-    //             .headers(headers)
-    //             .send());
-    //         match response.status {
-    //             StatusCode::Ok => {
-    //                 let mut response_str = String::new();
-    //                 try!(response.read_to_string(&mut response_str));
-    //                 let transactions: Vec<Transaction> = try!(json::decode(&response_str));
-    //                 Ok(transactions.into_iter().collect())
-    //             }
-    //             StatusCode::Unauthorized => Err(Error::Unauthorized),
-    //             _ => Err(Error::ServerError),
-    //         }
-    //     } else {
-    //         Err(Error::Unauthorized)
-    //     }
-    // }
+    /// Registers the user
+    pub fn register<S: AsRef<str>>(&self,
+                                   access_token: &AccessToken,
+                                   username: S,
+                                   password: S,
+                                   email: S)
+                                   -> Result<()> {
+        if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            headers.set(Connection(vec![ConnectionOption::Close]));
+            let register: Register = Register {
+                username: String::from(username.as_ref()),
+                password: String::from(password.as_ref()),
+                email: String::from(email.as_ref()),
+            };
+            let mut response = try!(self.client
+                .post(&format!("{}register", self.url))
+                .body(&json::encode(&register).unwrap())
+                .headers(headers)
+                .send());
+            match response.status {
+                StatusCode::Ok => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    if response_str.contains("Error") {
+                        Err(Error::RegistrationError)
+                    } else {
+                        Ok(())
+                    }
+                }
+                StatusCode::Unauthorized => Err(Error::Unauthorized),
+                _ => Err(Error::ServerError),
+            }
+        } else {
+            Err(Error::Unauthorized)
+        }
+    }
+
+    /// Sets the user password
+    pub fn set_password<S: AsRef<str>>(&self,
+                                       access_token: &AccessToken,
+                                       old_password: S,
+                                       new_password: S)
+                                       -> Result<()> {
+        if access_token.scopes().any(|s| match s {
+            &Scope::User(_) => true,
+            _ => false,
+        }) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            headers.set(Connection(vec![ConnectionOption::Close]));
+            let dto: UpdateUser = UpdateUser {
+                new_username: None,
+                new_email: None,
+                new_first: None,
+                new_last: None,
+                old_password: Some(String::from(old_password.as_ref())),
+                new_password: Some(String::from(new_password.as_ref())),
+                new_phone: None,
+                new_birthday: None,
+                new_image: None,
+                new_address: None,
+            };
+            let mut response = try!(self.client
+                .post(&format!("{}update_user/{}",
+                               self.url,
+                               access_token.scopes().fold(0, |acc, s| match s {
+                                   &Scope::User(id) => id,
+                                   _ => acc,
+                               })))
+                .body(&json::encode(&dto).unwrap())
+                .headers(headers)
+                .send());
+            match response.status {
+                StatusCode::Ok => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    // TODO read message and return error or success
+                    Ok(())
+                }
+                StatusCode::Unauthorized => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    println!("{:?}", response_str);
+                    Err(Error::Unauthorized)
+                }
+                _ => Err(Error::ServerError),
+            }
+        } else {
+            Err(Error::Unauthorized)
+        }
+    }
 }
