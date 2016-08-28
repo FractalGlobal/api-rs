@@ -21,6 +21,7 @@ pub enum Error {
     InvalidSecret,
     RegistrationError,
     TransactionError,
+    ConfirmConnectionError,
 }
 
 impl From<HyperError> for Error {
@@ -67,6 +68,7 @@ impl StdError for Error {
             Error::InvalidTokenType => "the provided token type is not a valid token type",
             Error::InvalidScope => "the provided scope is not a valid scope",
             Error::InvalidSecret => "the provided secret is not a valid secret",
+            Error::ConfirmConnectionError => "Error trying to confirm connection",
         }
     }
 

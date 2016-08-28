@@ -25,7 +25,9 @@ use hyper::status::StatusCode;
 use rustc_serialize::base64::FromBase64;
 use rustc_serialize::json;
 use dto::{FromDTO, UserDTO, ScopeDTO as Scope, GenerateTransactionDTO as GenerateTransaction,
-          LoginDTO as Login, RegisterDTO as Register, UpdateUserDTO as UpdateUser};
+          LoginDTO as Login, RegisterDTO as Register, UpdateUserDTO as UpdateUser, FractalConnectionDTO as ConnectionInvitation, ConfirmPendingConnectionDTO as ConfirmConnection};
+
+use chrono::NaiveDate;
 
 pub mod error;
 pub mod types;
@@ -35,7 +37,7 @@ use error::{Result, Error};
 use types::{User, Transaction};
 use oauth::AccessToken;
 
-use utils::{WalletAddress, Amount};
+use utils::{WalletAddress, Amount, Address, Relationship};
 
 /// Application's secret length.
 pub const SECRET_LEN: usize = 20;
@@ -206,7 +208,7 @@ impl ClientV1 {
                 destination_id: receiver_id,
                 amount: amount,
             };
-            let mut response = try!(self.client
+            let response = try!(self.client
                 .post(&format!("{}generate_transaction", self.url))
                 .body(&json::encode(&dto).unwrap())
                 .headers(headers)
@@ -298,6 +300,372 @@ impl ClientV1 {
         }
     }
 
+    /// Sets the users username
+    pub fn set_username<S: AsRef<str>>(&self, access_token: &AccessToken, user_id: u64, password: Option<S>, username: S) -> Result<()> {
+        if access_token.scopes().any(|s| match s {
+            &Scope::User(u_id) => u_id == user_id,
+            &Scope::Admin => true,
+            _ => false,
+        }) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            headers.set(Connection(vec![ConnectionOption::Close]));
+            let dto: UpdateUser = UpdateUser {
+                new_username: Some(String::from(username.as_ref())),
+                new_email: None,
+                new_first: None,
+                new_last: None,
+                old_password: match password {
+                    Some(pass) => Some(String::from(pass.as_ref())),
+                    None => None,
+                 },
+                new_password: None,
+                new_phone: None,
+                new_birthday: None,
+                new_image: None,
+                new_address: None,
+            };
+            let mut response = try!(self.client
+                .post(&format!("{}update_user/{}",
+                               self.url,
+                               user_id))
+                .body(&json::encode(&dto).unwrap())
+                .headers(headers)
+                .send());
+            match response.status {
+                StatusCode::Ok => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    // TODO read message and return error or success
+                    Ok(())
+                }
+                StatusCode::Unauthorized => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    println!("{:?}", response_str);
+                    Err(Error::Unauthorized)
+                }
+                _ => Err(Error::ServerError),
+            }
+        } else {
+            Err(Error::Unauthorized)
+        }
+    }
+
+    /// Sets the users phone
+    pub fn set_phone<S: AsRef<str>>(&self, access_token: &AccessToken, user_id: u64, password: Option<S>, phone: S) -> Result<()> {
+        if access_token.scopes().any(|s| match s {
+            &Scope::User(u_id) => u_id == user_id,
+            &Scope::Admin => true,
+            _ => false,
+        }) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            headers.set(Connection(vec![ConnectionOption::Close]));
+            let dto: UpdateUser = UpdateUser {
+                new_username: None,
+                new_email: None,
+                new_first: None,
+                new_last: None,
+                old_password: match password {
+                    Some(pass) => Some(String::from(pass.as_ref())),
+                    None => None,
+                 },
+                new_password: None,
+                new_phone: Some(String::from(phone.as_ref())),
+                new_birthday: None,
+                new_image: None,
+                new_address: None,
+            };
+            let mut response = try!(self.client
+                .post(&format!("{}update_user/{}",
+                               self.url,
+                               user_id))
+                .body(&json::encode(&dto).unwrap())
+                .headers(headers)
+                .send());
+            match response.status {
+                StatusCode::Ok => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    // TODO read message and return error or success
+                    Ok(())
+                }
+                StatusCode::Unauthorized => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    println!("{:?}", response_str);
+                    Err(Error::Unauthorized)
+                }
+                _ => Err(Error::ServerError),
+            }
+        } else {
+            Err(Error::Unauthorized)
+        }
+    }
+
+    /// Sets the users birthday
+    pub fn set_birthday<S: AsRef<str>>(&self, access_token: &AccessToken, user_id: u64, password: Option<S>, birthday: NaiveDate) -> Result<()> {
+        if access_token.scopes().any(|s| match s {
+            &Scope::User(u_id) => u_id == user_id,
+            &Scope::Admin => true,
+            _ => false,
+        }) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            headers.set(Connection(vec![ConnectionOption::Close]));
+            let dto: UpdateUser = UpdateUser {
+                new_username: None,
+                new_email: None,
+                new_first: None,
+                new_last: None,
+                old_password: match password {
+                    Some(pass) => Some(String::from(pass.as_ref())),
+                    None => None,
+                 },
+                new_password: None,
+                new_phone: None,
+                new_birthday: Some(birthday),
+                new_image: None,
+                new_address: None,
+            };
+            let mut response = try!(self.client
+                .post(&format!("{}update_user/{}",
+                               self.url,
+                               user_id))
+                .body(&json::encode(&dto).unwrap())
+                .headers(headers)
+                .send());
+            match response.status {
+                StatusCode::Ok => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    // TODO read message and return error or success
+                    Ok(())
+                }
+                StatusCode::Unauthorized => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    println!("{:?}", response_str);
+                    Err(Error::Unauthorized)
+                }
+                _ => Err(Error::ServerError),
+            }
+        } else {
+            Err(Error::Unauthorized)
+        }
+    }
+
+
+    /// Sets the users first and last name
+    pub fn set_name<S: AsRef<str>>(&self, access_token: &AccessToken, user_id: u64, password: Option<S>, first: S, last: S) -> Result<()> {
+        if access_token.scopes().any(|s| match s {
+            &Scope::User(u_id) => u_id == user_id,
+            &Scope::Admin => true,
+            _ => false,
+        }) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            headers.set(Connection(vec![ConnectionOption::Close]));
+            let dto: UpdateUser = UpdateUser {
+                new_username: None,
+                new_email: None,
+                new_first: Some(String::from(first.as_ref())),
+                new_last: Some(String::from(last.as_ref())),
+                old_password: match password {
+                    Some(pass) => Some(String::from(pass.as_ref())),
+                    None => None,
+                 },
+                new_password: None,
+                new_phone: None,
+                new_birthday: None,
+                new_image: None,
+                new_address: None,
+            };
+            let mut response = try!(self.client
+                .post(&format!("{}update_user/{}",
+                               self.url,
+                               user_id))
+                .body(&json::encode(&dto).unwrap())
+                .headers(headers)
+                .send());
+            match response.status {
+                StatusCode::Ok => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    // TODO read message and return error or success
+                    Ok(())
+                }
+                StatusCode::Unauthorized => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    println!("{:?}", response_str);
+                    Err(Error::Unauthorized)
+                }
+                _ => Err(Error::ServerError),
+            }
+        } else {
+            Err(Error::Unauthorized)
+        }
+    }
+
+
+    /// Sets the users email
+    pub fn set_email<S: AsRef<str>>(&self, access_token: &AccessToken, user_id: u64, password: Option<S>, email: S) -> Result<()> {
+        if access_token.scopes().any(|s| match s {
+            &Scope::User(u_id) => u_id == user_id,
+            &Scope::Admin => true,
+            _ => false,
+        }) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            headers.set(Connection(vec![ConnectionOption::Close]));
+            let dto: UpdateUser = UpdateUser {
+                new_username: None,
+                new_email: Some(String::from(email.as_ref())),
+                new_first: None,
+                new_last: None,
+                old_password: match password {
+                    Some(pass) => Some(String::from(pass.as_ref())),
+                    None => None,
+                 },
+                new_password: None,
+                new_phone: None,
+                new_birthday: None,
+                new_image: None,
+                new_address: None,
+            };
+            let mut response = try!(self.client
+                .post(&format!("{}update_user/{}",
+                               self.url,
+                               user_id))
+                .body(&json::encode(&dto).unwrap())
+                .headers(headers)
+                .send());
+            match response.status {
+                StatusCode::Ok => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    // TODO read message and return error or success
+                    Ok(())
+                }
+                StatusCode::Unauthorized => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    println!("{:?}", response_str);
+                    Err(Error::Unauthorized)
+                }
+                _ => Err(Error::ServerError),
+            }
+        } else {
+            Err(Error::Unauthorized)
+        }
+    }
+
+    /// Sets the users profile picture
+    pub fn set_image<S: AsRef<str>>(&self, access_token: &AccessToken, user_id: u64, password: Option<S>, image: S) -> Result<()> {
+        if access_token.scopes().any(|s| match s {
+            &Scope::User(u_id) => u_id == user_id,
+            &Scope::Admin => true,
+            _ => false,
+        }) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            headers.set(Connection(vec![ConnectionOption::Close]));
+            let dto: UpdateUser = UpdateUser {
+                new_username: None,
+                new_email: None,
+                new_first: None,
+                new_last: None,
+                old_password: match password {
+                    Some(pass) => Some(String::from(pass.as_ref())),
+                    None => None,
+                 },
+                new_password: None,
+                new_phone: None,
+                new_birthday: None,
+                new_image: Some(String::from(image.as_ref())),
+                new_address: None,
+            };
+            let mut response = try!(self.client
+                .post(&format!("{}update_user/{}",
+                               self.url,
+                               user_id))
+                .body(&json::encode(&dto).unwrap())
+                .headers(headers)
+                .send());
+            match response.status {
+                StatusCode::Ok => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    // TODO read message and return error or success
+                    Ok(())
+                }
+                StatusCode::Unauthorized => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    println!("{:?}", response_str);
+                    Err(Error::Unauthorized)
+                }
+                _ => Err(Error::ServerError),
+            }
+        } else {
+            Err(Error::Unauthorized)
+        }
+    }
+
+    /// Sets the users address
+    pub fn set_address<S: AsRef<str>>(&self, access_token: &AccessToken, user_id: u64, password: Option<S>, address: Address) -> Result<()> {
+        if access_token.scopes().any(|s| match s {
+            &Scope::User(u_id) => u_id == user_id,
+            &Scope::Admin => true,
+            _ => false,
+        }) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            headers.set(Connection(vec![ConnectionOption::Close]));
+            let dto: UpdateUser = UpdateUser {
+                new_username: None,
+                new_email: None,
+                new_first: None,
+                new_last: None,
+                old_password: match password {
+                    Some(pass) => Some(String::from(pass.as_ref())),
+                    None => None,
+                 },
+                new_password: None,
+                new_phone: None,
+                new_birthday: None,
+                new_image: None,
+                new_address: Some(address),
+            };
+
+
+            let mut response = try!(self.client
+                .post(&format!("{}update_user/{}", self.url, user_id))
+                .body(&json::encode(&dto).unwrap())
+                .headers(headers)
+                .send());
+            match response.status {
+                StatusCode::Ok => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    // TODO read message and return error or success
+                    Ok(())
+                }
+                StatusCode::Unauthorized => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    println!("{:?}", response_str);
+                    Err(Error::Unauthorized)
+                }
+                _ => Err(Error::ServerError),
+            }
+        } else {
+            Err(Error::Unauthorized)
+        }
+    }
+
     /// Sets the user password
     pub fn set_password<S: AsRef<str>>(&self,
                                        access_token: &AccessToken,
@@ -339,6 +707,100 @@ impl ClientV1 {
                     try!(response.read_to_string(&mut response_str));
                     // TODO read message and return error or success
                     Ok(())
+                }
+                StatusCode::Unauthorized => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    println!("{:?}", response_str);
+                    Err(Error::Unauthorized)
+                }
+                _ => Err(Error::ServerError),
+            }
+        } else {
+            Err(Error::Unauthorized)
+        }
+    }
+
+    /// Creates a pending invitation to connect to the user
+    pub fn invite_user_to_connect(&self, access_token: &AccessToken, user: u64, relation: Relationship) -> Result<()> {
+        if access_token.scopes().any(|s| match s {
+            &Scope::User(_) => true,
+            _ => false,
+        }) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            headers.set(Connection(vec![ConnectionOption::Close]));
+            let dto: ConnectionInvitation = ConnectionInvitation {
+                origin_id:  access_token.scopes().fold(0, |acc, s| match s {
+                     &Scope::User(id) => id,
+                     _ => acc,
+                 }),
+                 destination_id: user,
+                 relationship: relation,
+            };
+            let mut response = try!(self.client
+                .post(&format!("{}create_pending_connection",
+                               self.url,
+                              ))
+                .body(&json::encode(&dto).unwrap())
+                .headers(headers)
+                .send());
+            match response.status {
+                StatusCode::Ok => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    // TODO read message and return error or success
+                    Ok(())
+                }
+                StatusCode::Unauthorized => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    println!("{:?}", response_str);
+                    Err(Error::Unauthorized)
+                }
+                _ => Err(Error::ServerError),
+            }
+        } else {
+            Err(Error::Unauthorized)
+        }
+    }
+
+    /// Confirms a connection
+    pub fn confirm_connection(&self, access_token: &AccessToken, connection_id: u64, user: u64) -> Result<()> {
+        if access_token.scopes().any(|s| match s {
+            &Scope::User(_) => true,
+            _ => false,
+        }) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            headers.set(Connection(vec![ConnectionOption::Close]));
+            let dto: ConfirmConnection = ConfirmConnection {
+                origin:  user,
+                 destination: access_token.scopes().fold(0, |acc, s| match s {
+                      &Scope::User(id) => id,
+                      _ => acc,
+                  }),
+                 id: connection_id,
+            };
+            let mut response = try!(self.client
+                .post(&format!("{}confirm_pending_connection",
+                               self.url,
+                              ))
+                .body(&json::encode(&dto).unwrap())
+                .headers(headers)
+                .send());
+            match response.status {
+                StatusCode::Ok => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    if response_str.contains("Error")
+                    {
+                        Err(Error::ConfirmConnectionError)
+                    }
+                    else
+                    {
+                        Ok(())
+                    }
                 }
                 StatusCode::Unauthorized => {
                     let mut response_str = String::new();
