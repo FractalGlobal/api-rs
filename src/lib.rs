@@ -798,4 +798,38 @@ impl ClientV1 {
             Err(Error::Unauthorized)
         }
     }
+
+    /// Confirms the users email
+    pub fn confirm_email(&self, email_key: String) -> Result<()> {
+        let response = try!(self.client
+            .get(&format!("{}confirm_email/{}", self.url, email_key))
+            .send());
+            match response.status {
+                StatusCode::Ok => {
+                    Ok(())
+                }
+                _ => Err(Error::ServerError)
+            }
+    }
+
+    /// Deletes the user
+    pub fn delete_user(&self, access_token: &AccessToken, user_id: u64) -> Result<()> {
+        if access_token.scopes().any(|s| s == &Scope::Admin) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let response = try!(self.client
+                .delete(&format!("{}user/{}", self.url, user_id))
+                .headers(headers)
+                .send());
+            match response.status {
+                StatusCode::Ok => {
+                    Ok(())
+                }
+                StatusCode::Unauthorized => Err(Error::Unauthorized),
+                _ => Err(Error::ServerError),
+            }
+        } else {
+            Err(Error::Unauthorized)
+        }
+    }
 }
