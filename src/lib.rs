@@ -19,13 +19,15 @@ use std::time::Duration;
 use std::io::Read;
 
 use hyper::Client as HyperClient;
-use hyper::header::{Headers, Authorization, Basic, Accept, qitem, Connection, ConnectionOption};
+use hyper::header::{Headers, Authorization, Basic, Accept, qitem};
 use hyper::mime::{Mime, TopLevel, SubLevel, Attr, Value};
 use hyper::status::StatusCode;
 use rustc_serialize::base64::FromBase64;
 use rustc_serialize::json;
 use dto::{FromDTO, UserDTO, ScopeDTO as Scope, GenerateTransactionDTO as GenerateTransaction,
-          LoginDTO as Login, RegisterDTO as Register, UpdateUserDTO as UpdateUser, FractalConnectionDTO as ConnectionInvitation, ConfirmPendingConnectionDTO as ConfirmConnection};
+          LoginDTO as Login, RegisterDTO as Register, UpdateUserDTO as UpdateUser,
+          FractalConnectionDTO as ConnectionInvitation, ConfirmPendingConnectionDTO as ConfirmConnection,
+      ResetPasswordDTO as ResetPassword};
 
 use chrono::NaiveDate;
 
@@ -255,6 +257,38 @@ impl ClientV1 {
             Err(Error::Unauthorized)
         }
     }
+
+    /// Begins a the reset password procecss
+    pub fn start_reset_password<S: AsRef<str>>(&self,
+                                access_token: &AccessToken,
+                                username: S,
+                                email: S)
+                                -> Result<()> {
+        if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let dto: ResetPassword = ResetPassword {
+                username: String::from(username.as_ref()),
+                email: String::from(email.as_ref()),
+            };
+            let response = try!(self.client
+                .post(&format!("{}start_reset_password", self.url))
+                .body(&json::encode(&dto).unwrap())
+                .headers(headers)
+                .send());
+            match response.status {
+                StatusCode::Ok => {
+                    Ok(())
+                }
+                StatusCode::Unauthorized => Err(Error::Unauthorized),
+                _ => Err(Error::ServerError),
+            }
+        } else {
+            Err(Error::Unauthorized)
+        }
+    }
+
+
 
     /// Registers the user
     pub fn register<S: AsRef<str>>(&self,
