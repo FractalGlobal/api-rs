@@ -114,7 +114,6 @@ impl ClientV1 {
                         StatusCode::Ok => {
                             let mut response_str = String::new();
                             try!(response.read_to_string(&mut response_str));
-                            println!("{:?}", response_str);
                             Ok(try!(AccessToken::from_dto(try!(json::decode(&response_str)))))
                         }
                         StatusCode::Unauthorized => Err(Error::Unauthorized),
@@ -229,14 +228,14 @@ impl ClientV1 {
     /// Logs the user in
     pub fn login<S: AsRef<str>>(&self,
                                 access_token: &AccessToken,
-                                username: S,
+                                user_email: S,
                                 password: S)
                                 -> Result<AccessToken> {
         if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let dto: Login = Login {
-                username: String::from(username.as_ref()),
+                user_email: String::from(user_email.as_ref()),
                 password: String::from(password.as_ref()),
             };
             let mut response = try!(self.client
@@ -287,8 +286,6 @@ impl ClientV1 {
             Err(Error::Unauthorized)
         }
     }
-
-
 
     /// Registers the user
     pub fn register<S: AsRef<str>>(&self,
@@ -369,7 +366,6 @@ impl ClientV1 {
                 StatusCode::Unauthorized => {
                     let mut response_str = String::new();
                     try!(response.read_to_string(&mut response_str));
-                    println!("{:?}", response_str);
                     Err(Error::Unauthorized)
                 }
                 _ => Err(Error::ServerError),
@@ -420,7 +416,6 @@ impl ClientV1 {
                 StatusCode::Unauthorized => {
                     let mut response_str = String::new();
                     try!(response.read_to_string(&mut response_str));
-                    println!("{:?}", response_str);
                     Err(Error::Unauthorized)
                 }
                 _ => Err(Error::ServerError),
@@ -471,7 +466,6 @@ impl ClientV1 {
                 StatusCode::Unauthorized => {
                     let mut response_str = String::new();
                     try!(response.read_to_string(&mut response_str));
-                    println!("{:?}", response_str);
                     Err(Error::Unauthorized)
                 }
                 _ => Err(Error::ServerError),
@@ -480,7 +474,6 @@ impl ClientV1 {
             Err(Error::Unauthorized)
         }
     }
-
 
     /// Sets the users first and last name
     pub fn set_name<S: AsRef<str>>(&self, access_token: &AccessToken, user_id: u64, password: Option<S>, first: S, last: S) -> Result<()> {
@@ -523,7 +516,6 @@ impl ClientV1 {
                 StatusCode::Unauthorized => {
                     let mut response_str = String::new();
                     try!(response.read_to_string(&mut response_str));
-                    println!("{:?}", response_str);
                     Err(Error::Unauthorized)
                 }
                 _ => Err(Error::ServerError),
@@ -532,7 +524,6 @@ impl ClientV1 {
             Err(Error::Unauthorized)
         }
     }
-
 
     /// Sets the users email
     pub fn set_email<S: AsRef<str>>(&self, access_token: &AccessToken, user_id: u64, password: Option<S>, email: S) -> Result<()> {
@@ -575,7 +566,6 @@ impl ClientV1 {
                 StatusCode::Unauthorized => {
                     let mut response_str = String::new();
                     try!(response.read_to_string(&mut response_str));
-                    println!("{:?}", response_str);
                     Err(Error::Unauthorized)
                 }
                 _ => Err(Error::ServerError),
@@ -626,7 +616,6 @@ impl ClientV1 {
                 StatusCode::Unauthorized => {
                     let mut response_str = String::new();
                     try!(response.read_to_string(&mut response_str));
-                    println!("{:?}", response_str);
                     Err(Error::Unauthorized)
                 }
                 _ => Err(Error::ServerError),
@@ -677,7 +666,6 @@ impl ClientV1 {
                 StatusCode::Unauthorized => {
                     let mut response_str = String::new();
                     try!(response.read_to_string(&mut response_str));
-                    println!("{:?}", response_str);
                     Err(Error::Unauthorized)
                 }
                 _ => Err(Error::ServerError),
@@ -731,7 +719,6 @@ impl ClientV1 {
                 StatusCode::Unauthorized => {
                     let mut response_str = String::new();
                     try!(response.read_to_string(&mut response_str));
-                    println!("{:?}", response_str);
                     Err(Error::Unauthorized)
                 }
                 _ => Err(Error::ServerError),
@@ -774,7 +761,6 @@ impl ClientV1 {
                 StatusCode::Unauthorized => {
                     let mut response_str = String::new();
                     try!(response.read_to_string(&mut response_str));
-                    println!("{:?}", response_str);
                     Err(Error::Unauthorized)
                 }
                 _ => Err(Error::ServerError),
@@ -823,7 +809,6 @@ impl ClientV1 {
                 StatusCode::Unauthorized => {
                     let mut response_str = String::new();
                     try!(response.read_to_string(&mut response_str));
-                    println!("{:?}", response_str);
                     Err(Error::Unauthorized)
                 }
                 _ => Err(Error::ServerError),

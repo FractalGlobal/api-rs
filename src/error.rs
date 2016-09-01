@@ -1,3 +1,7 @@
+//! Error module
+//!
+//! Contains API errors along with result types.
+
 use std::{fmt, io};
 use std::result::Result as StdResult;
 use std::error::Error as StdError;
@@ -6,21 +10,35 @@ use hyper::error::Error as HyperError;
 use rustc_serialize::json;
 use dto::FromDTOError;
 
+/// The result type of the API.
 pub type Result<T> = StdResult<T, Error>;
 
+/// The error type of the API.
 #[derive(Debug)]
 pub enum Error {
+    /// Hyper request error.
     HyperError(HyperError),
+    /// IO error.
     IO(io::Error),
+    /// Error converting value from DTO object.
     FromDTOError(FromDTOError),
+    /// JSON decode error.
     JSONDecodeError(json::DecoderError),
+    /// Unauthorized.
     Unauthorized,
+    /// Internal server error.
     ServerError,
+    /// The token type is not valid.
     InvalidTokenType,
+    /// The scope is not valid.
     InvalidScope,
+    /// The secret is not valid.
     InvalidSecret,
+    /// Registration error.
     RegistrationError,
+    /// An error occurred generating a transaction.
     TransactionError,
+    /// Connection confirmation error.
     ConfirmConnectionError,
 }
 
