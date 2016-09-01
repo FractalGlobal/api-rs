@@ -287,6 +287,34 @@ impl ClientV1 {
         }
     }
 
+    /// Resends the email confirmation
+    pub fn resend_email_confirmation(&self, access_token: &AccessToken) -> Result<()> {
+        let mut user_id = None;
+        for scope in access_token.scopes() {
+            match scope {
+                &Scope::User(id) => user_id = Some(id),
+                _ => {},
+            }
+        }
+        if user_id.is_some() && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let response = try!(self.client
+            .get(&format!("{}resend_email_confirmation", self.url))
+            .headers(headers)
+            .send());
+            match response.status {
+                StatusCode::Ok => {
+                    Ok(())
+                }
+                StatusCode::Unauthorized => Err(Error::Unauthorized),
+                _ => Err(Error::ServerError),
+            }
+        } else {
+                Err(Error::Unauthorized)
+        }
+    }
+
     /// Registers the user
     pub fn register<S: AsRef<str>>(&self,
                                    access_token: &AccessToken,
