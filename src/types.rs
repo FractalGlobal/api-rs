@@ -1,4 +1,6 @@
-
+//! Types returned by the API.
+//!
+//! This module contains all the types required by the API to enable an easier use of it.
 use utils::{WalletAddress, Amount, Address};
 use std::collections::{BTreeSet, HashMap};
 use chrono::{DateTime, UTC, NaiveDate};

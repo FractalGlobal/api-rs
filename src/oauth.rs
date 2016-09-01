@@ -1,5 +1,6 @@
-
-use std::str::FromStr;
+//! OAuth module for the Fractal API.
+//!
+//! contains the required structs and enums for a typesafe OAuth with the API.
 use std::slice::Iter;
 use std::result::Result as StdResult;
 
