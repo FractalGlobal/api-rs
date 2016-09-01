@@ -91,7 +91,7 @@ impl ClientV1 {
     }
 
     /// Gets a token from the API.
-    pub fn token<S: AsRef<str>>(&mut self, app_id: S, secret: S) -> Result<AccessToken> {
+    pub fn token<S: AsRef<str>>(&self, app_id: S, secret: S) -> Result<AccessToken> {
         match secret.as_ref().from_base64() {
             Ok(b) => {
                 if b.len() == SECRET_LEN {
