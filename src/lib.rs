@@ -149,6 +149,11 @@ impl ClientV1 {
                         .collect())
                 }
                 StatusCode::Unauthorized => Err(Error::Unauthorized),
+                StatusCode::Accepted => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    Err(Error::ClientError(response_str))
+                },
                 _ => Err(Error::ServerError),
             }
         } else {
@@ -176,6 +181,11 @@ impl ClientV1 {
                     Ok(transactions.into_iter().collect())
                 }
                 StatusCode::Unauthorized => Err(Error::Unauthorized),
+                StatusCode::Accepted => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    Err(Error::ClientError(response_str))
+                },
                 _ => Err(Error::ServerError),
             }
         } else {
@@ -205,7 +215,7 @@ impl ClientV1 {
                 destination_id: receiver_id,
                 amount: amount,
             };
-            let response = try!(self.client
+            let mut response = try!(self.client
                 .post(&format!("{}generate_transaction", self.url))
                 .body(&json::encode(&dto).unwrap())
                 .headers(headers)
@@ -218,6 +228,11 @@ impl ClientV1 {
                     Ok(())
                 }
                 StatusCode::Unauthorized => Err(Error::Unauthorized),
+                StatusCode::Accepted => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    Err(Error::ClientError(response_str))
+                },
                 _ => Err(Error::ServerError),
             }
         } else {
@@ -250,6 +265,11 @@ impl ClientV1 {
                     Ok(try!(AccessToken::from_dto(try!(json::decode(&response_str)))))
                 }
                 StatusCode::Unauthorized => Err(Error::Unauthorized),
+                StatusCode::Accepted => {
+                    let mut response_str = String::new();
+                    try!(response.read_to_string(&mut response_str));
+                    Err(Error::ClientError(response_str))
+                }
                 _ => Err(Error::ServerError),
             }
         } else {
@@ -337,14 +357,13 @@ impl ClientV1 {
                 .send());
             match response.status {
                 StatusCode::Ok => {
+                    Ok(())
+                }
+                StatusCode::Accepted => {
                     let mut response_str = String::new();
                     try!(response.read_to_string(&mut response_str));
-                    if response_str.contains("Error") {
-                        Err(Error::RegistrationError)
-                    } else {
-                        Ok(())
-                    }
-                }
+                    Err(Error::ClientError(response_str))
+                },
                 StatusCode::Unauthorized => Err(Error::Unauthorized),
                 _ => Err(Error::ServerError),
             }
@@ -781,16 +800,14 @@ impl ClientV1 {
                 .send());
             match response.status {
                 StatusCode::Ok => {
-                    let mut response_str = String::new();
-                    try!(response.read_to_string(&mut response_str));
-                    // TODO read message and return error or success
                     Ok(())
                 }
-                StatusCode::Unauthorized => {
+                StatusCode::Unauthorized => Err(Error::Unauthorized),
+                StatusCode::Accepted => {
                     let mut response_str = String::new();
                     try!(response.read_to_string(&mut response_str));
-                    Err(Error::Unauthorized)
-                }
+                    Err(Error::ClientError(response_str))
+                },
                 _ => Err(Error::ServerError),
             }
         } else {

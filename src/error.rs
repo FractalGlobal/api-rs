@@ -24,6 +24,8 @@ pub enum Error {
     FromDTOError(FromDTOError),
     /// JSON decode error.
     JSONDecodeError(json::DecoderError),
+    /// Error Logging in
+    ClientError(String),
     /// Unauthorized.
     Unauthorized,
     /// Internal server error.
@@ -79,6 +81,7 @@ impl StdError for Error {
             Error::IO(ref e) => e.description(),
             Error::FromDTOError(ref e) => e.description(),
             Error::JSONDecodeError(ref e) => e.description(),
+            Error::ClientError(ref e) => e,
             Error::TransactionError => "Error Generating Transaction",
             Error::RegistrationError => "Error Registering User",
             Error::Unauthorized => "the provided token is not authorized to use the method",
