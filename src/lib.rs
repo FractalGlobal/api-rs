@@ -959,9 +959,9 @@ impl ClientV1 {
     }
 
     /// Confirms the users email
-    pub fn confirm_email(&self, email_key: String) -> Result<()> {
+    pub fn confirm_email<S: AsRef<str>>(&self, email_key: S) -> Result<()> {
         let response = try!(self.client
-            .get(&format!("{}confirm_email/{}", self.url, email_key))
+            .get(&format!("{}confirm_email/{}", self.url, email_key.as_ref()))
             .send());
         match response.status {
             StatusCode::Ok => Ok(()),
