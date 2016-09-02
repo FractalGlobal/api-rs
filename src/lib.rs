@@ -305,7 +305,7 @@ impl ClientV1 {
                 username: String::from(username.as_ref()),
                 email: String::from(email.as_ref()),
             };
-            let response = try!(self.client
+            let mut response = try!(self.client
                 .post(&format!("{}start_reset_password", self.url))
                 .body(&json::encode(&dto).unwrap())
                 .headers(headers)
@@ -313,6 +313,14 @@ impl ClientV1 {
             match response.status {
                 StatusCode::Ok => Ok(()),
                 StatusCode::Unauthorized => Err(Error::Unauthorized),
+                StatusCode::Accepted => {
+                    let mut response_str = String::new();
+                    let _ = try!(response.read_to_string(&mut response_str));
+                    match json::decode::<ResponseDTO>(&response_str) {
+                        Ok(r) => Err(Error::ClientError(r)),
+                        Err(e) => Err(e.into()),
+                    }
+                }
                 _ => Err(Error::ServerError),
             }
         } else {
@@ -979,7 +987,7 @@ impl ClientV1 {
         }
     }
 
-    /// Confirms the users email
+    /// Attempts to confirm the new password reset
     pub fn confirm_new_password_reset<S: AsRef<str>>(&self, access_token: &AccessToken, password_key: S, new_password: S) -> Result<()> {
         if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
             let mut headers = Headers::new();
