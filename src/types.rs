@@ -2,7 +2,7 @@
 //!
 //! This module contains all the types required by the API to enable an easier use of it.
 use utils::{WalletAddress, Amount, Address};
-use std::collections::{BTreeSet, HashMap};
+use std::collections::{btree_set, BTreeSet, hash_map, HashMap};
 use chrono::{DateTime, UTC, NaiveDate};
 use dto::{UserDTO, FromDTO, FromDTOError};
 use std::result::Result as StdResult;
@@ -48,11 +48,180 @@ pub struct User {
     /// The Date the user registered
     registered: DateTime<UTC>,
     /// The time the user was last seen doing an activity
-    last_activty: DateTime<UTC>,
+    last_activity: DateTime<UTC>,
     /// Whether the user is banned
     banned: Option<DateTime<UTC>>,
 }
 
+impl User {
+    /// Gets the ID of the user.
+    pub fn get_id(&self) -> u64 {
+        self.id
+    }
+
+    /// Gets the username of the user.
+    pub fn get_username(&self) -> &str {
+        &self.username
+    }
+
+    /// Gets the email of the user.
+    pub fn get_email(&self) -> &str {
+        &self.email.0
+    }
+
+    /// Returns wether the email of the user has been confirmed or not.
+    pub fn is_email_confirmed(&self) -> bool {
+        self.email.1
+    }
+
+    /// Gets the first name of the user, if it has been set.
+    pub fn get_first_name(&self) -> Option<&str> {
+        match self.first {
+            Some((ref f, _c)) => Some(f),
+            None => None,
+        }
+    }
+
+    /// Returns wether the first name of the user has been confirmed or not.
+    pub fn is_first_name_confirmed(&self) -> bool {
+        match self.first {
+            Some((_, c)) => c,
+            None => false,
+        }
+    }
+
+    /// Gets the last name of the user, if it has been set.
+    pub fn get_last_name(&self) -> Option<&str> {
+        match self.last {
+            Some((ref l, _c)) => Some(l),
+            None => None,
+        }
+    }
+
+    /// Returns wether the last name of the user has been confirmed or not.
+    pub fn is_last_name_confirmed(&self) -> bool {
+        match self.last {
+            Some((_, c)) => c,
+            None => false,
+        }
+    }
+
+    /// Gets the device count of the user.
+    pub fn get_device_count(&self) -> u8 {
+        self.device_count
+    }
+
+    /// Gets an iterator through the wallet addresses of the user.
+    pub fn wallet_addresses(&self) -> btree_set::Iter<WalletAddress> {
+        self.wallet_addresses.iter()
+    }
+
+    /// Gets the checking balance of the user.
+    pub fn get_checking_balance(&self) -> Amount {
+        self.checking_balance
+    }
+
+    /// Gets the cold balance of the user.
+    pub fn get_cold_balance(&self) -> Amount {
+        self.cold_balance
+    }
+
+    /// Gets the bonds purchased by the user.
+    pub fn bonds(&self) -> hash_map::Iter<DateTime<UTC>, u64> {
+        self.bonds.iter()
+    }
+
+    /// Gets the birthday of the user, if it has been set.
+    pub fn get_birthday(&self) -> Option<NaiveDate> {
+        match self.birthday {
+            Some((b, _c)) => Some(b),
+            None => None,
+        }
+    }
+
+    /// Returns wether the birthday of the user has been confirmed or not.
+    pub fn is_birthday_confirmed(&self) -> bool {
+        match self.birthday {
+            Some((_b, c)) => c,
+            None => false,
+        }
+    }
+
+    /// Gets the phone of the user, if it has been set.
+    pub fn get_phone(&self) -> Option<&str> {
+        match self.phone {
+            Some((ref p, _c)) => Some(p),
+            None => None,
+        }
+    }
+
+    /// Returns wether the phone of the user has been confirmed or not.
+    pub fn is_phone_confirmed(&self) -> bool {
+        match self.phone {
+            Some((_, c)) => c,
+            None => false,
+        }
+    }
+
+    /// Gets the image of the user, if it has been set.
+    pub fn get_image(&self) -> Option<&str> {
+        match self.image {
+            Some(ref i) => Some(i),
+            None => None,
+        }
+    }
+
+    /// Gets the address of the user, if it has been set.
+    pub fn get_address(&self) -> Option<&Address> {
+        match self.address {
+            Some((ref a, _c)) => Some(&a),
+            None => None,
+        }
+    }
+
+    /// Returns wether the address of the user is confirmed or not.
+    pub fn is_address_confirmed(&self) -> bool {
+        match self.address {
+            Some((_, c)) => c,
+            None => false,
+        }
+    }
+
+    /// Gets the sybil score of the user.
+    pub fn get_sybil_score(&self) -> i8 {
+        self.sybil_score
+    }
+
+    /// Gets the trust score of the user.
+    pub fn get_trust_score(&self) -> i8 {
+        self.trust_score
+    }
+
+    /// Returns wether the user is enabled or not.
+    pub fn is_enabled(&self) -> bool {
+        self.enabled
+    }
+
+    /// Gets the registration time of the user.
+    pub fn get_registration_time(&self) -> DateTime<UTC> {
+        self.registered
+    }
+
+    /// Gets the last activity time of the user.
+    pub fn get_last_activity(&self) -> DateTime<UTC> {
+        self.last_activity
+    }
+
+    /// Returns wether the user is banned or not.
+    pub fn is_banned(&self) -> bool {
+        self.banned.is_none() || self.banned.unwrap() > UTC::now()
+    }
+
+    /// Returns the ban's expiration time, if it has been set.
+    pub fn ban_expiration(&self) -> Option<DateTime<UTC>> {
+        self.banned
+    }
+}
 
 impl FromDTO<UserDTO> for User {
     fn from_dto(dto: UserDTO) -> StdResult<User, FromDTOError> {
@@ -101,7 +270,7 @@ impl FromDTO<UserDTO> for User {
             trust_score: dto.trust_score,
             enabled: dto.enabled,
             registered: dto.registered,
-            last_activty: dto.last_activty,
+            last_activity: dto.last_activity,
             banned: dto.banned,
         })
     }

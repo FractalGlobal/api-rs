@@ -114,7 +114,7 @@ impl ClientV1 {
                     match response.status {
                         StatusCode::Ok => {
                             let mut response_str = String::new();
-                            try!(response.read_to_string(&mut response_str));
+                            let _ = try!(response.read_to_string(&mut response_str));
                             Ok(try!(AccessToken::from_dto(try!(json::decode(&response_str)))))
                         }
                         StatusCode::Unauthorized => Err(Error::Unauthorized),
@@ -140,7 +140,7 @@ impl ClientV1 {
             match response.status {
                 StatusCode::Ok => {
                     let mut response_str = String::new();
-                    try!(response.read_to_string(&mut response_str));
+                    let _ = try!(response.read_to_string(&mut response_str));
                     let dto_users: Vec<UserDTO> = try!(json::decode(&response_str));
                     Ok(dto_users.into_iter()
                         .filter_map(|u| match User::from_dto(u) {
@@ -152,7 +152,7 @@ impl ClientV1 {
                 StatusCode::Unauthorized => Err(Error::Unauthorized),
                 StatusCode::Accepted => {
                     let mut response_str = String::new();
-                    try!(response.read_to_string(&mut response_str));
+                    let _ = try!(response.read_to_string(&mut response_str));
                     match json::decode::<ResponseDTO>(&response_str) {
                         Ok(r) => Err(Error::ClientError(r)),
                         Err(e) => Err(e.into()),
@@ -180,14 +180,14 @@ impl ClientV1 {
             match response.status {
                 StatusCode::Ok => {
                     let mut response_str = String::new();
-                    try!(response.read_to_string(&mut response_str));
+                    let _ = try!(response.read_to_string(&mut response_str));
                     let transactions: Vec<Transaction> = try!(json::decode(&response_str));
                     Ok(transactions.into_iter().collect())
                 }
                 StatusCode::Unauthorized => Err(Error::Unauthorized),
                 StatusCode::Accepted => {
                     let mut response_str = String::new();
-                    try!(response.read_to_string(&mut response_str));
+                    let _ = try!(response.read_to_string(&mut response_str));
                     match json::decode::<ResponseDTO>(&response_str) {
                         Ok(r) => Err(Error::ClientError(r)),
                         Err(e) => Err(e.into()),
@@ -237,7 +237,7 @@ impl ClientV1 {
                 StatusCode::Unauthorized => Err(Error::Unauthorized),
                 StatusCode::Accepted => {
                     let mut response_str = String::new();
-                    try!(response.read_to_string(&mut response_str));
+                    let _ = try!(response.read_to_string(&mut response_str));
                     match json::decode::<ResponseDTO>(&response_str) {
                         Ok(r) => Err(Error::ClientError(r)),
                         Err(e) => Err(e.into()),
@@ -273,13 +273,13 @@ impl ClientV1 {
             match response.status {
                 StatusCode::Ok => {
                     let mut response_str = String::new();
-                    try!(response.read_to_string(&mut response_str));
+                    let _ = try!(response.read_to_string(&mut response_str));
                     Ok(try!(AccessToken::from_dto(try!(json::decode(&response_str)))))
                 }
                 StatusCode::Unauthorized => Err(Error::Unauthorized),
                 StatusCode::Accepted => {
                     let mut response_str = String::new();
-                    try!(response.read_to_string(&mut response_str));
+                    let _ = try!(response.read_to_string(&mut response_str));
                     match json::decode::<ResponseDTO>(&response_str) {
                         Ok(r) => Err(Error::ClientError(r)),
                         Err(e) => Err(e.into()),
@@ -359,28 +359,28 @@ impl ClientV1 {
                 .get(&format!("{}user/{}", self.url, user_id))
                 .headers(headers)
                 .send());
-                match response.status {
-                    StatusCode::Ok => {
-                        let mut response_str = String::new();
-                        try!(response.read_to_string(&mut response_str));
-                        match json::decode::<User>(&response_str) {
-                            Ok(user) => Ok(user),
-                            Err(e) => Err(e.into()),
-                        }
-                    },
-                    StatusCode::Accepted => {
-                        let mut response_str = String::new();
-                        try!(response.read_to_string(&mut response_str));
-                        match json::decode::<ResponseDTO>(&response_str) {
-                            Ok(r) => Err(Error::ClientError(r)),
-                            Err(e) => Err(e.into()),
-                        }
+            match response.status {
+                StatusCode::Ok => {
+                    let mut response_str = String::new();
+                    let _ = try!(response.read_to_string(&mut response_str));
+                    match json::decode::<User>(&response_str) {
+                        Ok(user) => Ok(user),
+                        Err(e) => Err(e.into()),
                     }
-                    StatusCode::Unauthorized => Err(Error::Unauthorized),
-                    _ => Err(Error::ServerError),
                 }
-            } else {
-                Err(Error::Unauthorized)
+                StatusCode::Accepted => {
+                    let mut response_str = String::new();
+                    let _ = try!(response.read_to_string(&mut response_str));
+                    match json::decode::<ResponseDTO>(&response_str) {
+                        Ok(r) => Err(Error::ClientError(r)),
+                        Err(e) => Err(e.into()),
+                    }
+                }
+                StatusCode::Unauthorized => Err(Error::Unauthorized),
+                _ => Err(Error::ServerError),
+            }
+        } else {
+            Err(Error::Unauthorized)
         }
     }
 
@@ -397,35 +397,35 @@ impl ClientV1 {
             for scope in access_token.scopes() {
                 match scope {
                     &Scope::User(id) => user_id = id,
-                    _ => {},
+                    _ => {}
                 }
             }
             let mut response = try!(self.client
                 .get(&format!("{}user/{}", self.url, user_id))
                 .headers(headers)
                 .send());
-                match response.status {
-                    StatusCode::Ok => {
-                        let mut response_str = String::new();
-                        try!(response.read_to_string(&mut response_str));
-                        match json::decode::<User>(&response_str) {
-                            Ok(user) => Ok(user),
-                            Err(e) => Err(e.into()),
-                        }
-                    },
-                    StatusCode::Accepted => {
-                        let mut response_str = String::new();
-                        try!(response.read_to_string(&mut response_str));
-                        match json::decode::<ResponseDTO>(&response_str) {
-                            Ok(r) => Err(Error::ClientError(r)),
-                            Err(e) => Err(e.into()),
-                        }
+            match response.status {
+                StatusCode::Ok => {
+                    let mut response_str = String::new();
+                    let _ = try!(response.read_to_string(&mut response_str));
+                    match json::decode::<User>(&response_str) {
+                        Ok(user) => Ok(user),
+                        Err(e) => Err(e.into()),
                     }
-                    StatusCode::Unauthorized => Err(Error::Unauthorized),
-                    _ => Err(Error::ServerError),
                 }
-            } else {
-                Err(Error::Unauthorized)
+                StatusCode::Accepted => {
+                    let mut response_str = String::new();
+                    let _ = try!(response.read_to_string(&mut response_str));
+                    match json::decode::<ResponseDTO>(&response_str) {
+                        Ok(r) => Err(Error::ClientError(r)),
+                        Err(e) => Err(e.into()),
+                    }
+                }
+                StatusCode::Unauthorized => Err(Error::Unauthorized),
+                _ => Err(Error::ServerError),
+            }
+        } else {
+            Err(Error::Unauthorized)
         }
     }
 
@@ -453,7 +453,7 @@ impl ClientV1 {
                 StatusCode::Ok => Ok(()),
                 StatusCode::Accepted => {
                     let mut response_str = String::new();
-                    try!(response.read_to_string(&mut response_str));
+                    let _ = try!(response.read_to_string(&mut response_str));
                     match json::decode::<ResponseDTO>(&response_str) {
                         Ok(r) => Err(Error::ClientError(r)),
                         Err(e) => Err(e.into()),
@@ -894,7 +894,7 @@ impl ClientV1 {
                 StatusCode::Unauthorized => Err(Error::Unauthorized),
                 StatusCode::Accepted => {
                     let mut response_str = String::new();
-                    try!(response.read_to_string(&mut response_str));
+                    let _ = try!(response.read_to_string(&mut response_str));
                     match json::decode::<ResponseDTO>(&response_str) {
                         Ok(r) => Err(Error::ClientError(r)),
                         Err(e) => Err(e.into()),
@@ -939,12 +939,12 @@ impl ClientV1 {
                 StatusCode::Ok => Ok(()),
                 StatusCode::Unauthorized => {
                     let mut response_str = String::new();
-                    try!(response.read_to_string(&mut response_str));
+                    let _ = try!(response.read_to_string(&mut response_str));
                     Err(Error::Unauthorized)
                 }
                 StatusCode::Accepted => {
                     let mut response_str = String::new();
-                    try!(response.read_to_string(&mut response_str));
+                    let _ = try!(response.read_to_string(&mut response_str));
                     match json::decode::<ResponseDTO>(&response_str) {
                         Ok(r) => Err(Error::ClientError(r)),
                         Err(e) => Err(e.into()),
