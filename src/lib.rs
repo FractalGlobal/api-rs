@@ -979,7 +979,7 @@ impl ClientV1 {
         }
     }
 
-    /// Confirms the users email
+    /// Attempts to confirm the new password reset
     pub fn confirm_new_password_reset<S: AsRef<str>>(&self, access_token: &AccessToken, password_key: S, new_password: S) -> Result<()> {
         if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
             let mut headers = Headers::new();
