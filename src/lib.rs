@@ -384,6 +384,51 @@ impl ClientV1 {
         }
     }
 
+
+    /// Gets the logged in users info
+    pub fn get_me(&self, access_token: &AccessToken) -> Result<User> {
+        if access_token.scopes().any(|s| match s {
+            &Scope::User(_) => true,
+            _ => false,
+        }) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let mut user_id = 0;
+            for scope in access_token.scopes() {
+                match scope {
+                    &Scope::User(id) => user_id = id,
+                    _ => {},
+                }
+            }
+            let mut response = try!(self.client
+                .get(&format!("{}user/{}", self.url, user_id))
+                .headers(headers)
+                .send());
+                match response.status {
+                    StatusCode::Ok => {
+                        let mut response_str = String::new();
+                        try!(response.read_to_string(&mut response_str));
+                        match json::decode::<User>(&response_str) {
+                            Ok(user) => Ok(user),
+                            Err(e) => Err(e.into()),
+                        }
+                    },
+                    StatusCode::Accepted => {
+                        let mut response_str = String::new();
+                        try!(response.read_to_string(&mut response_str));
+                        match json::decode::<ResponseDTO>(&response_str) {
+                            Ok(r) => Err(Error::ClientError(r)),
+                            Err(e) => Err(e.into()),
+                        }
+                    }
+                    StatusCode::Unauthorized => Err(Error::Unauthorized),
+                    _ => Err(Error::ServerError),
+                }
+            } else {
+                Err(Error::Unauthorized)
+        }
+    }
+
     /// Registers the user
     pub fn register<S: AsRef<str>>(&self,
                                    access_token: &AccessToken,
