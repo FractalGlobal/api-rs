@@ -28,7 +28,7 @@ use dto::{FromDTO, UserDTO, ScopeDTO as Scope, GenerateTransactionDTO as Generat
           LoginDTO as Login, RegisterDTO as Register, UpdateUserDTO as UpdateUser,
           FractalConnectionDTO as ConnectionInvitation,
           ConfirmPendingConnectionDTO as ConfirmConnection, ResetPasswordDTO as ResetPassword,
-          ResponseDTO};
+          ResponseDTO, NewPasswordDTO as NewPassword};
 
 use chrono::NaiveDate;
 
@@ -953,22 +953,60 @@ impl ClientV1 {
     }
 
     /// Confirms the users email
-    pub fn confirm_email<S: AsRef<str>>(&self, email_key: S) -> Result<()> {
+    pub fn confirm_email<S: AsRef<str>>(&self, access_token: &AccessToken, email_key: S) -> Result<()> {
+        if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
         let mut response = try!(self.client
             .get(&format!("{}confirm_email/{}", self.url, email_key.as_ref()))
+            .headers(headers)
             .send());
-        match response.status {
-            StatusCode::Ok => Ok(()),
-            StatusCode::Accepted => {
-                let mut response_str = String::new();
-                let _ = try!(response.read_to_string(&mut response_str));
-                match json::decode::<ResponseDTO>(&response_str) {
-                    Ok(r) => Err(Error::ClientError(r)),
-                    Err(e) => Err(e.into()),
-                }
+            match response.status {
+                StatusCode::Ok => Ok(()),
+                StatusCode::Accepted => {
+                    let mut response_str = String::new();
+                    let _ = try!(response.read_to_string(&mut response_str));
+                    match json::decode::<ResponseDTO>(&response_str) {
+                        Ok(r) => Err(Error::ClientError(r)),
+                        Err(e) => Err(e.into()),
+                    }
 
+                }
+                _ => Err(Error::ServerError),
             }
-            _ => Err(Error::ServerError),
+        } else {
+            Err(Error::Unauthorized)
+        }
+    }
+
+    /// Confirms the users email
+    pub fn confirm_new_password_reset<S: AsRef<str>>(&self, access_token: &AccessToken, password_key: S, new_password: S) -> Result<()> {
+        if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let dto: NewPassword = NewPassword {
+                new_password: String::from(new_password.as_ref()),
+                };
+        let mut response = try!(self.client
+            .post(&format!("{}reset_password/{}", self.url, password_key.as_ref()))
+            .body(&json::encode(&dto).unwrap())
+            .headers(headers)
+            .send());
+            match response.status {
+                StatusCode::Ok => Ok(()),
+                StatusCode::Accepted => {
+                    let mut response_str = String::new();
+                    let _ = try!(response.read_to_string(&mut response_str));
+                    match json::decode::<ResponseDTO>(&response_str) {
+                        Ok(r) => Err(Error::ClientError(r)),
+                        Err(e) => Err(e.into()),
+                    }
+
+                }
+                _ => Err(Error::ServerError),
+            }
+        } else {
+            Err(Error::Unauthorized)
         }
     }
 
