@@ -15,6 +15,8 @@ pub struct User {
     id: u64,
     /// The unique username of the user
     username: String,
+    /// Display name of the user
+    displayname: String,
     /// The users email
     email: (String, bool),
     /// The users first name
@@ -62,6 +64,11 @@ impl User {
     /// Gets the username of the user.
     pub fn get_username(&self) -> &str {
         &self.username
+    }
+
+    /// Gets the displayname of the user
+    pub fn get_displayname(&self) -> &str {
+        &self.displayname
     }
 
     /// Gets the email of the user.
@@ -254,6 +261,7 @@ impl FromDTO<UserDTO> for User {
         Ok(User {
             id: dto.id,
             username: dto.username,
+            displayname: dto.displayname,
             email: (dto.email, dto.email_confirmed),
             first: first_opt,
             last: last_opt,
