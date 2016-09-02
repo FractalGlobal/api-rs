@@ -8,7 +8,7 @@ use std::error::Error as StdError;
 
 use hyper::error::Error as HyperError;
 use rustc_serialize::json;
-use dto::FromDTOError;
+use dto::{FromDTOError, ResponseDTO};
 
 /// The result type of the API.
 pub type Result<T> = StdResult<T, Error>;
@@ -25,7 +25,7 @@ pub enum Error {
     /// JSON decode error.
     JSONDecodeError(json::DecoderError),
     /// Error Logging in
-    ClientError(String),
+    ClientError(ResponseDTO),
     /// Unauthorized.
     Unauthorized,
     /// Internal server error.
@@ -81,7 +81,7 @@ impl StdError for Error {
             Error::IO(ref e) => e.description(),
             Error::FromDTOError(ref e) => e.description(),
             Error::JSONDecodeError(ref e) => e.description(),
-            Error::ClientError(ref e) => e,
+            Error::ClientError(ref e) => &e.message,
             Error::TransactionError => "Error Generating Transaction",
             Error::RegistrationError => "Error Registering User",
             Error::Unauthorized => "the provided token is not authorized to use the method",
