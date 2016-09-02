@@ -9,7 +9,7 @@ use std::result::Result as StdResult;
 
 
 /// Struct that holds all personal information for the user
-#[derive(Clone, RustcEncodable, RustcDecodable, Debug)]
+#[derive(Clone, Debug)]
 pub struct User {
     /// The unique ID of the user
     id: u64,

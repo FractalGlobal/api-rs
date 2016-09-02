@@ -363,10 +363,7 @@ impl ClientV1 {
                 StatusCode::Ok => {
                     let mut response_str = String::new();
                     let _ = try!(response.read_to_string(&mut response_str));
-                    match json::decode::<User>(&response_str) {
-                        Ok(user) => Ok(user),
-                        Err(e) => Err(e.into()),
-                    }
+                    Ok(try!(User::from_dto(try!(json::decode::<UserDTO>(&response_str)))))
                 }
                 StatusCode::Accepted => {
                     let mut response_str = String::new();
@@ -408,10 +405,7 @@ impl ClientV1 {
                 StatusCode::Ok => {
                     let mut response_str = String::new();
                     let _ = try!(response.read_to_string(&mut response_str));
-                    match json::decode::<User>(&response_str) {
-                        Ok(user) => Ok(user),
-                        Err(e) => Err(e.into()),
-                    }
+                    Ok(try!(User::from_dto(try!(json::decode::<UserDTO>(&response_str)))))
                 }
                 StatusCode::Accepted => {
                     let mut response_str = String::new();
