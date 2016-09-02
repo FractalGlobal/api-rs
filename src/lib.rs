@@ -954,11 +954,20 @@ impl ClientV1 {
 
     /// Confirms the users email
     pub fn confirm_email<S: AsRef<str>>(&self, email_key: S) -> Result<()> {
-        let response = try!(self.client
+        let mut response = try!(self.client
             .get(&format!("{}confirm_email/{}", self.url, email_key.as_ref()))
             .send());
         match response.status {
             StatusCode::Ok => Ok(()),
+            StatusCode::Accepted => {
+                let mut response_str = String::new();
+                let _ = try!(response.read_to_string(&mut response_str));
+                match json::decode::<ResponseDTO>(&response_str) {
+                    Ok(r) => Err(Error::ClientError(r)),
+                    Err(e) => Err(e.into()),
+                }
+
+            }
             _ => Err(Error::ServerError),
         }
     }
