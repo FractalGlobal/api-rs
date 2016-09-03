@@ -961,14 +961,17 @@ impl ClientV1 {
     }
 
     /// Confirms the users email
-    pub fn confirm_email<S: AsRef<str>>(&self, access_token: &AccessToken, email_key: S) -> Result<()> {
+    pub fn confirm_email<S: AsRef<str>>(&self,
+                                        access_token: &AccessToken,
+                                        email_key: S)
+                                        -> Result<()> {
         if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-        let mut response = try!(self.client
-            .get(&format!("{}confirm_email/{}", self.url, email_key.as_ref()))
-            .headers(headers)
-            .send());
+            let mut response = try!(self.client
+                .get(&format!("{}confirm_email/{}", self.url, email_key.as_ref()))
+                .headers(headers)
+                .send());
             match response.status {
                 StatusCode::Ok => Ok(()),
                 StatusCode::Accepted => {
@@ -988,18 +991,21 @@ impl ClientV1 {
     }
 
     /// Attempts to confirm the new password reset
-    pub fn confirm_new_password_reset<S: AsRef<str>>(&self, access_token: &AccessToken, password_key: S, new_password: S) -> Result<()> {
+    pub fn confirm_new_password_reset<S: AsRef<str>>(&self,
+                                                     access_token: &AccessToken,
+                                                     password_key: S,
+                                                     new_password: S)
+                                                     -> Result<()> {
         if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let dto: NewPassword = NewPassword {
-                new_password: String::from(new_password.as_ref()),
-                };
-        let mut response = try!(self.client
-            .post(&format!("{}reset_password/{}", self.url, password_key.as_ref()))
-            .body(&json::encode(&dto).unwrap())
-            .headers(headers)
-            .send());
+            let dto: NewPassword =
+                NewPassword { new_password: String::from(new_password.as_ref()) };
+            let mut response = try!(self.client
+                .post(&format!("{}reset_password/{}", self.url, password_key.as_ref()))
+                .body(&json::encode(&dto).unwrap())
+                .headers(headers)
+                .send());
             match response.status {
                 StatusCode::Ok => Ok(()),
                 StatusCode::Accepted => {
