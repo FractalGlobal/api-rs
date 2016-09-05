@@ -19,6 +19,8 @@ use std::time::Duration;
 use std::io::Read;
 
 use hyper::Client as HyperClient;
+use hyper::method::Method;
+use hyper::client::response::Response;
 use hyper::header::{Headers, Authorization, Basic, Accept, qitem};
 use hyper::mime::{Mime, TopLevel, SubLevel, Attr, Value};
 use hyper::status::StatusCode;
@@ -91,6 +93,32 @@ impl ClientV1 {
         self.client.set_write_timeout(timeout);
     }
 
+    fn send_request<S: AsRef<str>>(&self,
+                                   method: Method,
+                                   url: S,
+                                   headers: Headers,
+                                   body: Option<S>)
+                                   -> std::result::Result<Response, hyper::error::Error> {
+        let mut response = self.client
+            .request(method.clone(), url.as_ref())
+            .headers(headers.clone());
+        if let Some(ref b) = body {
+            response = response.body(b.as_ref());
+        }
+        let response = response.send();
+        if response.is_err() {
+            let mut response = self.client
+                .request(method, url.as_ref())
+                .headers(headers.clone());
+            if let Some(ref b) = body {
+                response = response.body(b.as_ref());
+            }
+            response.send()
+        } else {
+            response
+        }
+    }
+
     /// Gets a token from the API.
     pub fn token<S: AsRef<str>>(&self, app_id: S, secret: S) -> Result<AccessToken> {
         match secret.as_ref().from_base64() {
@@ -105,11 +133,10 @@ impl ClientV1 {
                         username: String::from(app_id.as_ref()),
                         password: Some(String::from(secret.as_ref())),
                     }));
-                    let mut response = try!(self.client
-                        .post(&format!("{}token", self.url))
-                        .body("grant_type=client_credentials")
-                        .headers(headers)
-                        .send());
+                    let mut response = try!(self.send_request(Method::Post,
+                                               format!("{}token", self.url).as_str(),
+                                               headers,
+                                               Some("grant_type=client_credentials")));
 
                     match response.status {
                         StatusCode::Ok => {
@@ -133,10 +160,8 @@ impl ClientV1 {
         if access_token.scopes().any(|s| s == &Scope::Admin) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let mut response = try!(self.client
-                .get(&format!("{}all_users", self.url))
-                .headers(headers)
-                .send());
+            let mut response = try!(self.send_request(Method::Get,
+                    format!("{}all_users", self.url), headers, None));
             match response.status {
                 StatusCode::Ok => {
                     let mut response_str = String::new();
@@ -173,10 +198,12 @@ impl ClientV1 {
         if access_token.scopes().any(|s| s == &Scope::Admin) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let mut response = try!(self.client
-                .get(&format!("{}all_transactions/{}", self.url, first_transaction))
-                .headers(headers)
-                .send());
+            let mut response = try!(self.send_request(Method::Get,
+                                                      format!("{}all_transactions/{}",
+                                                              self.url,
+                                                              first_transaction),
+                                                      headers,
+                                                      None));
             match response.status {
                 StatusCode::Ok => {
                     let mut response_str = String::new();
@@ -222,11 +249,11 @@ impl ClientV1 {
                 destination_id: receiver_id,
                 amount: amount,
             };
-            let mut response = try!(self.client
-                .post(&format!("{}generate_transaction", self.url))
-                .body(&json::encode(&dto).unwrap())
-                .headers(headers)
-                .send());
+            let mut response = try!(self.send_request(Method::Post,
+                                                      format!("{}generate_transaction", self.url),
+                                                      headers,
+                                                      Some(json::encode(&dto).unwrap())));
+
             match response.status {
                 StatusCode::Ok => {
                     // let mut response_str = String::new();
@@ -265,11 +292,11 @@ impl ClientV1 {
                 password: String::from(password.as_ref()),
                 remember_me: remember_me,
             };
-            let mut response = try!(self.client
-                .post(&format!("{}login", self.url))
-                .body(&json::encode(&dto).unwrap())
-                .headers(headers)
-                .send());
+            let mut response = try!(self.send_request(Method::Post,
+                                                      format!("{}login", self.url),
+                                                      headers,
+                                                      Some(json::encode(&dto).unwrap())));
+
             match response.status {
                 StatusCode::Ok => {
                     let mut response_str = String::new();
@@ -305,11 +332,11 @@ impl ClientV1 {
                 username: String::from(username.as_ref()),
                 email: String::from(email.as_ref()),
             };
-            let mut response = try!(self.client
-                .post(&format!("{}start_reset_password", self.url))
-                .body(&json::encode(&dto).unwrap())
-                .headers(headers)
-                .send());
+            let mut response = try!(self.send_request(Method::Post,
+                                                      format!("{}start_reset_password", self.url),
+                                                      headers,
+                                                      Some(json::encode(&dto).unwrap())));
+
             match response.status {
                 StatusCode::Ok => Ok(()),
                 StatusCode::Unauthorized => Err(Error::Unauthorized),
@@ -340,10 +367,12 @@ impl ClientV1 {
         if user_id.is_some() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let response = try!(self.client
-                .get(&format!("{}resend_email_confirmation", self.url))
-                .headers(headers)
-                .send());
+            let response = try!(self.send_request(Method::Get,
+                                                  format!("{}resend_email_confirmation",
+                                                          self.url),
+                                                  headers,
+                                                  None));
+
             match response.status {
                 StatusCode::Ok => Ok(()),
                 StatusCode::Unauthorized => Err(Error::Unauthorized),
@@ -363,10 +392,11 @@ impl ClientV1 {
         }) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let mut response = try!(self.client
-                .get(&format!("{}user/{}", self.url, user_id))
-                .headers(headers)
-                .send());
+            let mut response = try!(self.send_request(Method::Get,
+                                                      format!("{}user/{}", self.url, user_id),
+                                                      headers,
+                                                      None));
+
             match response.status {
                 StatusCode::Ok => {
                     let mut response_str = String::new();
@@ -405,10 +435,11 @@ impl ClientV1 {
                     _ => {}
                 }
             }
-            let mut response = try!(self.client
-                .get(&format!("{}user/{}", self.url, user_id))
-                .headers(headers)
-                .send());
+            let mut response = try!(self.send_request(Method::Get,
+                                                      format!("{}user/{}", self.url, user_id),
+                                                      headers,
+                                                      None));
+
             match response.status {
                 StatusCode::Ok => {
                     let mut response_str = String::new();
@@ -446,11 +477,11 @@ impl ClientV1 {
                 password: String::from(password.as_ref()),
                 email: String::from(email.as_ref()),
             };
-            let mut response = try!(self.client
-                .post(&format!("{}register", self.url))
-                .body(&json::encode(&register).unwrap())
-                .headers(headers)
-                .send());
+            let mut response = try!(self.send_request(Method::Post,
+                                                      format!("{}register", self.url),
+                                                      headers,
+                                                      Some(json::encode(&register).unwrap())));
+
             match response.status {
                 StatusCode::Ok => Ok(()),
                 StatusCode::Accepted => {
@@ -498,11 +529,11 @@ impl ClientV1 {
                 new_image: None,
                 new_address: None,
             };
-            let response = try!(self.client
-                .post(&format!("{}update_user/{}", self.url, user_id))
-                .body(&json::encode(&dto).unwrap())
-                .headers(headers)
-                .send());
+            let response = try!(self.send_request(Method::Post,
+                                                  format!("{}update_user/{}", self.url, user_id),
+                                                  headers,
+                                                  Some(json::encode(&dto).unwrap())));
+
             match response.status {
                 StatusCode::Ok => {
                     // let mut response_str = String::new();
@@ -547,11 +578,10 @@ impl ClientV1 {
                 new_image: None,
                 new_address: None,
             };
-            let response = try!(self.client
-                .post(&format!("{}update_user/{}", self.url, user_id))
-                .body(&json::encode(&dto).unwrap())
-                .headers(headers)
-                .send());
+            let response = try!(self.send_request(Method::Post,
+                                                  format!("{}update_user/{}", self.url, user_id),
+                                                  headers,
+                                                  Some(json::encode(&dto).unwrap())));
             match response.status {
                 StatusCode::Ok => {
                     // let mut response_str = String::new();
@@ -596,11 +626,10 @@ impl ClientV1 {
                 new_image: None,
                 new_address: None,
             };
-            let response = try!(self.client
-                .post(&format!("{}update_user/{}", self.url, user_id))
-                .body(&json::encode(&dto).unwrap())
-                .headers(headers)
-                .send());
+            let response = try!(self.send_request(Method::Post,
+                                                  format!("{}update_user/{}", self.url, user_id),
+                                                  headers,
+                                                  Some(json::encode(&dto).unwrap())));
             match response.status {
                 StatusCode::Ok => {
                     // let mut response_str = String::new();
@@ -646,11 +675,10 @@ impl ClientV1 {
                 new_image: None,
                 new_address: None,
             };
-            let response = try!(self.client
-                .post(&format!("{}update_user/{}", self.url, user_id))
-                .body(&json::encode(&dto).unwrap())
-                .headers(headers)
-                .send());
+            let response = try!(self.send_request(Method::Post,
+                                                  format!("{}update_user/{}", self.url, user_id),
+                                                  headers,
+                                                  Some(json::encode(&dto).unwrap())));
             match response.status {
                 StatusCode::Ok => {
                     // let mut response_str = String::new();
@@ -695,11 +723,10 @@ impl ClientV1 {
                 new_image: None,
                 new_address: None,
             };
-            let response = try!(self.client
-                .post(&format!("{}update_user/{}", self.url, user_id))
-                .body(&json::encode(&dto).unwrap())
-                .headers(headers)
-                .send());
+            let response = try!(self.send_request(Method::Post,
+                                                  format!("{}update_user/{}", self.url, user_id),
+                                                  headers,
+                                                  Some(json::encode(&dto).unwrap())));
             match response.status {
                 StatusCode::Ok => {
                     // let mut response_str = String::new();
@@ -744,11 +771,10 @@ impl ClientV1 {
                 new_image: Some(String::from(image.as_ref())),
                 new_address: None,
             };
-            let response = try!(self.client
-                .post(&format!("{}update_user/{}", self.url, user_id))
-                .body(&json::encode(&dto).unwrap())
-                .headers(headers)
-                .send());
+            let response = try!(self.send_request(Method::Post,
+                                                  format!("{}update_user/{}", self.url, user_id),
+                                                  headers,
+                                                  Some(json::encode(&dto).unwrap())));
             match response.status {
                 StatusCode::Ok => {
                     // let mut response_str = String::new();
@@ -793,13 +819,10 @@ impl ClientV1 {
                 new_image: None,
                 new_address: Some(address),
             };
-
-
-            let response = try!(self.client
-                .post(&format!("{}update_user/{}", self.url, user_id))
-                .body(&json::encode(&dto).unwrap())
-                .headers(headers)
-                .send());
+            let response = try!(self.send_request(Method::Post,
+                                                  format!("{}update_user/{}", self.url, user_id),
+                                                  headers,
+                                                  Some(json::encode(&dto).unwrap())));
             match response.status {
                 StatusCode::Ok => {
                     // let mut response_str = String::new();
@@ -839,16 +862,17 @@ impl ClientV1 {
                 new_image: None,
                 new_address: None,
             };
-            let response = try!(self.client
-                .post(&format!("{}update_user/{}",
-                               self.url,
-                               access_token.scopes().fold(0, |acc, s| match s {
-                                   &Scope::User(id) => id,
-                                   _ => acc,
-                               })))
-                .body(&json::encode(&dto).unwrap())
-                .headers(headers)
-                .send());
+            let response = try!(self.send_request(Method::Post,
+                                                  format!("{}update_user/{}",
+                                                          self.url,
+                                                          access_token.scopes()
+                                                              .fold(0, |acc, s| match s {
+                                                                  &Scope::User(id) => id,
+                                                                  _ => acc,
+                                                              })),
+                                                  headers,
+                                                  Some(json::encode(&dto).unwrap())));
+
             match response.status {
                 StatusCode::Ok => {
                     // let mut response_str = String::new();
@@ -884,13 +908,12 @@ impl ClientV1 {
                 destination_id: user,
                 relationship: relation,
             };
-            let mut response = try!(self.client
-                .post(&format!("{}create_pending_connection",
-                               self.url,
-                              ))
-                .body(&json::encode(&dto).unwrap())
-                .headers(headers)
-                .send());
+            let mut response = try!(self.send_request(Method::Post,
+                                                      format!("{}create_pending_connection",
+                                                              self.url),
+                                                      headers,
+                                                      Some(json::encode(&dto).unwrap())));
+
             match response.status {
                 StatusCode::Ok => Ok(()),
                 StatusCode::Unauthorized => Err(Error::Unauthorized),
@@ -930,13 +953,13 @@ impl ClientV1 {
                 }),
                 id: connection_id,
             };
-            let mut response = try!(self.client
-                .post(&format!("{}confirm_pending_connection",
-                               self.url,
-                              ))
-                .body(&json::encode(&dto).unwrap())
-                .headers(headers)
-                .send());
+            let mut response = try!(self.send_request(Method::Post,
+                                                      format!("{}confirm_pending_connection",
+                                   self.url,
+                                  ),
+                                                      headers,
+                                                      Some(json::encode(&dto).unwrap())));
+
             match response.status {
                 StatusCode::Ok => Ok(()),
                 StatusCode::Unauthorized => {
@@ -961,14 +984,20 @@ impl ClientV1 {
     }
 
     /// Confirms the users email
-    pub fn confirm_email<S: AsRef<str>>(&self, access_token: &AccessToken, email_key: S) -> Result<()> {
+    pub fn confirm_email<S: AsRef<str>>(&self,
+                                        access_token: &AccessToken,
+                                        email_key: S)
+                                        -> Result<()> {
         if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-        let mut response = try!(self.client
-            .get(&format!("{}confirm_email/{}", self.url, email_key.as_ref()))
-            .headers(headers)
-            .send());
+            let mut response = try!(self.send_request(Method::Post,
+                                                      format!("{}confirm_email/{}",
+                                                              self.url,
+                                                              email_key.as_ref()),
+                                                      headers,
+                                                      None));
+
             match response.status {
                 StatusCode::Ok => Ok(()),
                 StatusCode::Accepted => {
@@ -988,18 +1017,23 @@ impl ClientV1 {
     }
 
     /// Attempts to confirm the new password reset
-    pub fn confirm_new_password_reset<S: AsRef<str>>(&self, access_token: &AccessToken, password_key: S, new_password: S) -> Result<()> {
+    pub fn confirm_new_password_reset<S: AsRef<str>>(&self,
+                                                     access_token: &AccessToken,
+                                                     password_key: S,
+                                                     new_password: S)
+                                                     -> Result<()> {
         if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let dto: NewPassword = NewPassword {
-                new_password: String::from(new_password.as_ref()),
-                };
-        let mut response = try!(self.client
-            .post(&format!("{}reset_password/{}", self.url, password_key.as_ref()))
-            .body(&json::encode(&dto).unwrap())
-            .headers(headers)
-            .send());
+            let dto: NewPassword =
+                NewPassword { new_password: String::from(new_password.as_ref()) };
+            let mut response = try!(self.send_request(Method::Post,
+                                                      format!("{}reset_password/{}",
+                                                              self.url,
+                                                              password_key.as_ref()),
+                                                      headers,
+                                                      Some(json::encode(&dto).unwrap())));
+
             match response.status {
                 StatusCode::Ok => Ok(()),
                 StatusCode::Accepted => {
@@ -1023,10 +1057,11 @@ impl ClientV1 {
         if access_token.scopes().any(|s| s == &Scope::Admin) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let response = try!(self.client
-                .delete(&format!("{}user/{}", self.url, user_id))
-                .headers(headers)
-                .send());
+            let response = try!(self.send_request(Method::Delete,
+                                                  format!("{}user/{}", self.url, user_id),
+                                                  headers,
+                                                  None));
+
             match response.status {
                 StatusCode::Ok => Ok(()),
                 StatusCode::Unauthorized => Err(Error::Unauthorized),
