@@ -27,6 +27,8 @@ pub struct User {
     device_count: u8,
     /// The list of users wallet addresses
     wallet_addresses: BTreeSet<WalletAddress>,
+    /// The users pending balance
+    pending_balance: Amount,
     /// The checking wallet balance
     checking_balance: Amount,
     /// The cold wallet balance
@@ -266,6 +268,7 @@ impl FromDTO<UserDTO> for User {
             first: first_opt,
             last: last_opt,
             device_count: dto.device_count,
+            pending_balance: dto.pending_balance,
             wallet_addresses: dto.wallet_addresses,
             checking_balance: dto.checking_balance,
             cold_balance: dto.cold_balance,
