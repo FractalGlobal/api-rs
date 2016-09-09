@@ -33,7 +33,7 @@ install:
   - Win%MSYS_BITS%OpenSSL-1_0_2h.exe /SILENT /VERYSILENT /SP- /DIR="C:\OpenSSL"
   - if defined MSYS_BITS set PATH=C:\msys64\mingw%MSYS_BITS%\bin;C:\msys64\usr\bin;%PATH%
   - del .\rust-install.exe
-  - del .\Win${env:BITS}OpenSSL-1_0_2h.exe
+  - del .\Win%MSYS_BITS%OpenSSL-1_0_2h.exe
   - rustc -vV
   - cargo -vV
 
