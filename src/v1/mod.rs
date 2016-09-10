@@ -17,8 +17,8 @@ pub const FRACTAL_SERVER: &'static str = "https://api.fractal.global/";
 pub const FRACTAL_DEV_SERVER: &'static str = "https://dev.fractal.global/";
 
 pub mod types;
-pub mod oauth;
 mod client;
+pub mod oauth;
 mod public;
 mod user;
 mod friends;
