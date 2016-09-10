@@ -1,14 +1,142 @@
 //! Types returned by the API.
 //!
 //! This module contains all the types required by the API to enable an easier use of it.
-use utils::{WalletAddress, Amount, Address};
+
 use std::collections::{btree_set, BTreeSet, hash_map, HashMap};
-use chrono::{DateTime, UTC, NaiveDate};
-use dto::{UserDTO, FromDTO, FromDTOError};
+use std::slice::Iter;
 use std::result::Result as StdResult;
 
+use chrono::{DateTime, UTC, NaiveDate};
 
-/// Struct that holds all personal information for the user
+use dto::{UserDTO, FromDTO, FromDTOError, ScopeDTO as Scope, ClientInfoDTO, TransactionDTO,
+          ProfileDTO, PendingFriendRequestDTO};
+use utils::{WalletAddress, Amount, Address};
+
+/// Information about the API client.
+#[derive(Clone, Debug)]
+pub struct ClientInfo {
+    id: String,
+    secret: String,
+    scopes: Vec<Scope>,
+    request_limit: usize,
+}
+
+impl ClientInfo {
+    /// Gets the client ID.
+    pub fn get_id(&self) -> &str {
+        &self.id
+    }
+
+    /// Gets the client secret.
+    pub fn get_secret(&self) -> &str {
+        &self.secret
+    }
+
+    /// Gets an iterator through the scopes valid for the client.
+    pub fn scopes(&self) -> Iter<Scope> {
+        self.scopes.iter()
+    }
+
+    /// Gets the request limit for the client.
+    pub fn get_request_limit(&self) -> usize {
+        self.request_limit
+    }
+}
+
+impl FromDTO<ClientInfoDTO> for ClientInfo {
+    fn from_dto(dto: ClientInfoDTO) -> StdResult<ClientInfo, FromDTOError> {
+        Ok(ClientInfo {
+            id: dto.id,
+            secret: dto.secret,
+            scopes: dto.scopes,
+            request_limit: dto.request_limit,
+        })
+    }
+}
+
+/// Struct that holds all the profile information for the user.
+#[derive(Clone, Debug)]
+pub struct Profile {
+    user_id: u64,
+    display_name: String,
+    first_name: Option<String>,
+    last_name: Option<String>,
+    image: Option<String>,
+    age: Option<u8>,
+    address: Option<String>,
+    trust_score: i8,
+}
+
+impl Profile {
+    /// Gets the user's ID.
+    pub fn get_user_id(&self) -> u64 {
+        self.user_id
+    }
+
+    /// Gets the display name of the user.
+    pub fn get_display_name(&self) -> &str {
+        &self.display_name
+    }
+
+    /// Gets the first name of the user.
+    pub fn get_first_name(&self) -> Option<&str> {
+        match self.first_name.as_ref() {
+            Some(n) => Some(n),
+            None => None,
+        }
+    }
+
+    /// Gets the last name of the user.
+    pub fn get_last_name(&self) -> Option<&str> {
+        match self.last_name.as_ref() {
+            Some(n) => Some(n),
+            None => None,
+        }
+    }
+
+    /// Gets the image of the user.
+    pub fn get_image(&self) -> Option<&str> {
+        match self.image.as_ref() {
+            Some(n) => Some(n),
+            None => None,
+        }
+    }
+
+    /// Gets the age of the user.
+    pub fn get_age(&self) -> Option<u8> {
+        self.age
+    }
+
+    /// Gets the address of the user.
+    pub fn get_address(&self) -> Option<&str> {
+        match self.address.as_ref() {
+            Some(n) => Some(n),
+            None => None,
+        }
+    }
+
+    /// Gets the trust score of the user.
+    pub fn get_trust_score(&self) -> i8 {
+        self.trust_score
+    }
+}
+
+impl FromDTO<ProfileDTO> for Profile {
+    fn from_dto(dto: ProfileDTO) -> StdResult<Profile, FromDTOError> {
+        Ok(Profile {
+            user_id: dto.user_id,
+            display_name: dto.display_name,
+            first_name: dto.first_name,
+            last_name: dto.last_name,
+            image: dto.image,
+            age: dto.age,
+            address: dto.address,
+            trust_score: dto.trust_score,
+        })
+    }
+}
+
+/// Struct that holds all personal information for the user.
 #[derive(Clone, Debug)]
 pub struct User {
     /// The unique ID of the user
@@ -288,7 +416,7 @@ impl FromDTO<UserDTO> for User {
 }
 
 /// The representation of a global credit transaction
-#[derive(Clone, RustcEncodable, RustcDecodable, Debug)]
+#[derive(Clone, Debug)]
 pub struct Transaction {
     /// The id of the transaction
     id: u64,
@@ -297,7 +425,7 @@ pub struct Transaction {
     /// The destination of the transaction
     destination_user: u64,
     /// The destination address of the transaction
-    destination: WalletAddress,
+    destination_address: WalletAddress,
     /// The amount of the transaction
     amount: Amount,
     /// The timestamp of the transaction
@@ -314,8 +442,8 @@ impl Transaction {
         self.destination_user
     }
     /// Returns the wallet address receiving the transaction
-    pub fn get_destination(&self) -> &WalletAddress {
-        &self.destination
+    pub fn get_destination_address(&self) -> &WalletAddress {
+        &self.destination_address
     }
     /// Returns the user id sending the transaction
     pub fn get_origin_user(&self) -> u64 {
@@ -328,5 +456,59 @@ impl Transaction {
     /// The timestamp of the transaction
     pub fn get_timestamp(&self) -> &DateTime<UTC> {
         &self.timestamp
+    }
+}
+
+impl FromDTO<TransactionDTO> for Transaction {
+    fn from_dto(dto: TransactionDTO) -> StdResult<Transaction, FromDTOError> {
+        Ok(Transaction {
+            id: dto.id,
+            origin_user: dto.origin_user,
+            destination_user: dto.destination_user,
+            destination_address: dto.destination_address,
+            amount: dto.amount,
+            timestamp: dto.timestamp,
+        })
+    }
+}
+
+/// Pending friend request.
+#[derive(Clone, Debug)]
+pub struct PendingFriendRequest {
+    /// Connection ID.
+    connection_id: u64,
+    /// Origin user's profile.
+    origin_user: Profile,
+    /// Request message.
+    message: Option<String>,
+}
+
+impl PendingFriendRequest {
+    /// Gets the connection ID of the friend request.
+    pub fn get_connection_id(&self) -> u64 {
+        self.connection_id
+    }
+
+    /// Gets the origin user's profile of the friend request.
+    pub fn get_origin_user(&self) -> &Profile {
+        &self.origin_user
+    }
+
+    /// Gets the message of the friend request.
+    pub fn get_message(&self) -> Option<&str> {
+        match self.message.as_ref() {
+            Some(m) => Some(m),
+            None => None,
+        }
+    }
+}
+
+impl FromDTO<PendingFriendRequestDTO> for PendingFriendRequest {
+    fn from_dto(dto: PendingFriendRequestDTO) -> StdResult<PendingFriendRequest, FromDTOError> {
+        Ok(PendingFriendRequest {
+            connection_id: dto.connection_id,
+            origin_user: try!(Profile::from_dto(dto.origin_user)),
+            message: dto.message,
+        })
     }
 }
