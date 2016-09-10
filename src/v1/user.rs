@@ -5,7 +5,7 @@ use hyper::header::{Headers, Authorization};
 use hyper::status::StatusCode;
 use rustc_serialize::json;
 
-use chrono::{NaiveDate, UTC};
+use chrono::NaiveDate;
 
 use utils::Address;
 use dto::{FromDTO, UserDTO, ScopeDTO as Scope, AuthenticationCodeDTO, ResponseDTO, UpdateUserDTO};
@@ -206,10 +206,7 @@ impl Client {
         }) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let dto = AuthenticationCodeDTO {
-                code: code,
-                timestamp: UTC::now(),
-            };
+            let dto = AuthenticationCodeDTO { code: code };
             let mut response =
                 try!(self.send_request(Method::Post,
                                        format!("{}authenticate/{}", self.url, user_id),

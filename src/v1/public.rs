@@ -1,19 +1,15 @@
 use std::io::Read;
 
 use hyper::method::Method;
-use hyper::header::{Headers, Authorization, Basic, Accept, qitem};
-use hyper::mime::{Mime, TopLevel, SubLevel, Attr, Value};
+use hyper::header::{Headers, Authorization};
 use hyper::status::StatusCode;
-use rustc_serialize::base64::FromBase64;
 use rustc_serialize::json;
 
 use dto::{FromDTO, ScopeDTO as Scope, LoginDTO, RegisterDTO, ResetPasswordDTO, ResponseDTO,
-          NewPasswordDTO, CreateClientDTO, ClientInfoDTO};
-
-use super::{Client, VoidDTO, SECRET_LEN};
+          NewPasswordDTO};
 
 use error::{Result, Error};
-use super::types::ClientInfo;
+use super::{Client, VoidDTO};
 use super::oauth::AccessToken;
 
 /// Public methods for the client.
@@ -21,81 +17,6 @@ use super::oauth::AccessToken;
 /// These are the public methods for getting a token, creating and logging in users, and confirming
 /// their information.
 impl Client {
-    /// Gets a token from the API.
-    pub fn token<S: AsRef<str>>(&self, app_id: S, secret: S) -> Result<AccessToken> {
-        match secret.as_ref().from_base64() {
-            Ok(b) => {
-                if b.len() == SECRET_LEN {
-                    let mut headers = Headers::new();
-                    headers.set(Accept(vec![
-                            qitem(Mime(TopLevel::Application, SubLevel::Json,
-                                       vec![(Attr::Charset, Value::Utf8)])),
-                        ]));
-                    headers.set(Authorization(Basic {
-                        username: String::from(app_id.as_ref()),
-                        password: Some(String::from(secret.as_ref())),
-                    }));
-                    let mut response = try!(self.send_request(Method::Post,
-                                                              format!("{}token", self.url),
-                                                              headers,
-                                                              None::<&VoidDTO>));
-
-                    match response.status {
-                        StatusCode::Ok => {
-                            let mut response_str = String::new();
-                            let _ = try!(response.read_to_string(&mut response_str));
-                            Ok(try!(AccessToken::from_dto(try!(json::decode(&response_str)))))
-                        }
-                        StatusCode::Unauthorized => Err(Error::Unauthorized),
-                        _ => Err(Error::ServerError),
-                    }
-                } else {
-                    Err(Error::InvalidSecret)
-                }
-            }
-            Err(_) => Err(Error::InvalidSecret),
-        }
-    }
-
-    /// Creates a client
-    ///
-    /// Creates a client with the given name, scopes and request limit per hour. An admin scoped
-    /// token is required to use this API call.
-    pub fn create_client<S: AsRef<str>>(&self,
-                                        access_token: &AccessToken,
-                                        name: S,
-                                        scopes: &[Scope],
-                                        request_limit: usize)
-                                        -> Result<ClientInfo> {
-        if access_token.scopes().any(|s| s == &Scope::Admin) && !access_token.has_expired() {
-            let mut headers = Headers::new();
-            headers.set(Authorization(access_token.get_token()));
-            let mut scopes_vec = Vec::with_capacity(scopes.len());
-            scopes_vec.clone_from_slice(scopes);
-            let dto = CreateClientDTO {
-                name: String::from(name.as_ref()),
-                scopes: scopes_vec,
-                request_limit: request_limit,
-            };
-            let mut response = try!(self.send_request(Method::Post,
-                                                      format!("{}create_client", self.url),
-                                                      headers,
-                                                      Some(&dto)));
-            match response.status {
-                StatusCode::Ok => {
-                    let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    let dto_client: ClientInfoDTO = try!(json::decode(&response_str));
-                    Ok(try!(ClientInfo::from_dto(dto_client)))
-                }
-                StatusCode::Unauthorized => Err(Error::Unauthorized),
-                _ => Err(Error::ServerError),
-            }
-        } else {
-            Err(Error::Unauthorized)
-        }
-    }
-
     /// Registers the user
     pub fn register<S: AsRef<str>>(&self,
                                    access_token: &AccessToken,

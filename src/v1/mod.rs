@@ -11,8 +11,6 @@ use hyper::client::response::Response;
 use rustc_serialize::json;
 use dto::DTO;
 
-/// Application's secret length.
-pub const SECRET_LEN: usize = 20;
 /// Fractal API server.
 pub const FRACTAL_SERVER: &'static str = "https://api.fractal.global/";
 /// Fractal development API server.
