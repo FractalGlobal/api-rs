@@ -42,7 +42,7 @@ impl Client {
                 },
             };
             let mut response = try!(self.send_request(Method::Post,
-                                                      format!("{}create_pending_connection",
+                                                      format!("{}create_friend_request",
                                                               self.url),
                                                       headers,
                                                       Some(&dto)));
@@ -87,7 +87,7 @@ impl Client {
                 id: connection_id,
             };
             let mut response = try!(self.send_request(Method::Post,
-                                                      format!("{}confirm_pending_connection",
+                                                      format!("{}confirm_friend_request",
                                    self.url,
                                   ),
                                                       headers,
