@@ -26,23 +26,24 @@ use hyper::mime::{Mime, TopLevel, SubLevel, Attr, Value};
 use hyper::status::StatusCode;
 use rustc_serialize::base64::FromBase64;
 use rustc_serialize::json;
+
+use utils::{WalletAddress, Amount, Address};
 use dto::{FromDTO, UserDTO, ScopeDTO as Scope, GenerateTransactionDTO as GenerateTransaction,
           LoginDTO as Login, RegisterDTO as Register, UpdateUserDTO as UpdateUser,
-          FriendRequestDTO as FriendRequest, ConfirmPendingConnectionDTO as ConfirmConnection,
+          FriendRequestDTO, ConfirmFriendRequestDTO as ConfirmFriendRequest,
           ResetPasswordDTO as ResetPassword, ResponseDTO, NewPasswordDTO as NewPassword,
-          AuthenticationCodeDTO as AuthenticationCode};
+          CreateClientDTO, ClientInfoDTO, TransactionDTO, PendingFriendRequestDTO,
+          RelationshipDTO as Relationship, AuthenticationCodeDTO as AuthenticationCode};
 
-use chrono::{NaiveDate, UTC, DateTime};
+use chrono::{NaiveDate, UTC};
 
 pub mod error;
 pub mod types;
 pub mod oauth;
 
 use error::{Result, Error};
-use types::{User, Transaction};
+use types::{ClientInfo, User, Transaction, PendingFriendRequest};
 use oauth::AccessToken;
-
-use utils::{WalletAddress, Amount, Address, Relationship};
 
 /// Application's secret length.
 pub const SECRET_LEN: usize = 20;
@@ -155,24 +156,250 @@ impl ClientV1 {
         }
     }
 
-    /// Gets all users from the database.
-    pub fn get_all_users(&self, access_token: &AccessToken) -> Result<Vec<User>> {
+    /// Creates a client
+    ///
+    /// Creates a client with the given name, scopes and request limit per hour. An admin scoped
+    /// token is required to use this API call.
+    pub fn create_client<S: AsRef<str>>(&self,
+                                        access_token: &AccessToken,
+                                        name: S,
+                                        scopes: &[Scope],
+                                        request_limit: usize)
+                                        -> Result<ClientInfo> {
         if access_token.scopes().any(|s| s == &Scope::Admin) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let mut response = try!(self.send_request(Method::Get,
-                    format!("{}all_users", self.url), headers, None));
+            let mut scopes_vec = Vec::with_capacity(scopes.len());
+            scopes_vec.clone_from_slice(scopes);
+            let dto = CreateClientDTO {
+                name: String::from(name.as_ref()),
+                scopes: scopes_vec,
+                request_limit: request_limit,
+            };
+            let mut response = try!(self.send_request(Method::Post,
+                                                      format!("{}create_client", self.url),
+                                                      headers,
+                                                      Some(json::encode(&dto).unwrap())));
             match response.status {
                 StatusCode::Ok => {
                     let mut response_str = String::new();
                     let _ = try!(response.read_to_string(&mut response_str));
-                    let dto_users: Vec<UserDTO> = try!(json::decode(&response_str));
-                    Ok(dto_users.into_iter()
-                        .filter_map(|u| match User::from_dto(u) {
-                            Ok(u) => Some(u),
-                            Err(_) => None,
-                        })
-                        .collect())
+                    let dto_client: ClientInfoDTO = try!(json::decode(&response_str));
+                    Ok(try!(ClientInfo::from_dto(dto_client)))
+                }
+                StatusCode::Unauthorized => Err(Error::Unauthorized),
+                _ => Err(Error::ServerError),
+            }
+        } else {
+            Err(Error::Unauthorized)
+        }
+    }
+
+    /// Registers the user
+    pub fn register<S: AsRef<str>>(&self,
+                                   access_token: &AccessToken,
+                                   username: S,
+                                   password: S,
+                                   email: S)
+                                   -> Result<()> {
+        if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let register: Register = Register {
+                username: String::from(username.as_ref()),
+                password: String::from(password.as_ref()),
+                email: String::from(email.as_ref()),
+            };
+            let mut response = try!(self.send_request(Method::Post,
+                                                      format!("{}register", self.url),
+                                                      headers,
+                                                      Some(json::encode(&register).unwrap())));
+
+            match response.status {
+                StatusCode::Ok => Ok(()),
+                StatusCode::Accepted => {
+                    let mut response_str = String::new();
+                    let _ = try!(response.read_to_string(&mut response_str));
+                    match json::decode::<ResponseDTO>(&response_str) {
+                        Ok(r) => Err(Error::ClientError(r)),
+                        Err(e) => Err(e.into()),
+                    }
+                }
+                StatusCode::Unauthorized => Err(Error::Unauthorized),
+                _ => Err(Error::ServerError),
+            }
+        } else {
+            Err(Error::Unauthorized)
+        }
+    }
+
+    /// Resends the email confirmation
+    pub fn resend_email_confirmation(&self, access_token: &AccessToken) -> Result<()> {
+        let mut user_id = None;
+        for scope in access_token.scopes() {
+            match scope {
+                &Scope::User(id) => user_id = Some(id),
+                _ => {}
+            }
+        }
+        if user_id.is_some() && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let response = try!(self.send_request(Method::Get,
+                                                  format!("{}resend_email_confirmation",
+                                                          self.url),
+                                                  headers,
+                                                  None));
+
+            match response.status {
+                StatusCode::Ok => Ok(()),
+                StatusCode::Unauthorized => Err(Error::Unauthorized),
+                _ => Err(Error::ServerError),
+            }
+        } else {
+            Err(Error::Unauthorized)
+        }
+    }
+
+    /// Begins a the reset password procecss
+    pub fn start_reset_password<S: AsRef<str>>(&self,
+                                               access_token: &AccessToken,
+                                               username: S,
+                                               email: S)
+                                               -> Result<()> {
+        if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let dto: ResetPassword = ResetPassword {
+                username: String::from(username.as_ref()),
+                email: String::from(email.as_ref()),
+            };
+            let mut response = try!(self.send_request(Method::Post,
+                                                      format!("{}start_reset_password", self.url),
+                                                      headers,
+                                                      Some(json::encode(&dto).unwrap())));
+
+            match response.status {
+                StatusCode::Ok => Ok(()),
+                StatusCode::Unauthorized => Err(Error::Unauthorized),
+                StatusCode::Accepted => {
+                    let mut response_str = String::new();
+                    let _ = try!(response.read_to_string(&mut response_str));
+                    match json::decode::<ResponseDTO>(&response_str) {
+                        Ok(r) => Err(Error::ClientError(r)),
+                        Err(e) => Err(e.into()),
+                    }
+                }
+                _ => Err(Error::ServerError),
+            }
+        } else {
+            Err(Error::Unauthorized)
+        }
+    }
+
+    /// Get the user
+    pub fn get_user(&self, access_token: &AccessToken, user_id: u64) -> Result<User> {
+        if access_token.scopes().any(|s| match s {
+            &Scope::User(u_id) => u_id == user_id,
+            &Scope::Admin => true,
+            _ => false,
+        }) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let mut response = try!(self.send_request(Method::Get,
+                                                      format!("{}user/{}", self.url, user_id),
+                                                      headers,
+                                                      None));
+
+            match response.status {
+                StatusCode::Ok => {
+                    let mut response_str = String::new();
+                    let _ = try!(response.read_to_string(&mut response_str));
+                    Ok(try!(User::from_dto(try!(json::decode::<UserDTO>(&response_str)))))
+                }
+                StatusCode::Accepted => {
+                    let mut response_str = String::new();
+                    let _ = try!(response.read_to_string(&mut response_str));
+                    match json::decode::<ResponseDTO>(&response_str) {
+                        Ok(r) => Err(Error::ClientError(r)),
+                        Err(e) => Err(e.into()),
+                    }
+                }
+                StatusCode::Unauthorized => Err(Error::Unauthorized),
+                _ => Err(Error::ServerError),
+            }
+        } else {
+            Err(Error::Unauthorized)
+        }
+    }
+
+    /// Gets the logged in users info
+    pub fn get_me(&self, access_token: &AccessToken) -> Result<User> {
+        if access_token.scopes().any(|s| match s {
+            &Scope::User(_) => true,
+            _ => false,
+        }) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let mut user_id = 0;
+            for scope in access_token.scopes() {
+                match scope {
+                    &Scope::User(id) => user_id = id,
+                    _ => {}
+                }
+            }
+            let mut response = try!(self.send_request(Method::Get,
+                                                      format!("{}user/{}", self.url, user_id),
+                                                      headers,
+                                                      None));
+
+            match response.status {
+                StatusCode::Ok => {
+                    let mut response_str = String::new();
+                    let _ = try!(response.read_to_string(&mut response_str));
+                    Ok(try!(User::from_dto(try!(json::decode::<UserDTO>(&response_str)))))
+                }
+                StatusCode::Accepted => {
+                    let mut response_str = String::new();
+                    let _ = try!(response.read_to_string(&mut response_str));
+                    match json::decode::<ResponseDTO>(&response_str) {
+                        Ok(r) => Err(Error::ClientError(r)),
+                        Err(e) => Err(e.into()),
+                    }
+                }
+                StatusCode::Unauthorized => Err(Error::Unauthorized),
+                _ => Err(Error::ServerError),
+            }
+        } else {
+            Err(Error::Unauthorized)
+        }
+    }
+
+    /// Logs the user in
+    pub fn login<S: AsRef<str>>(&self,
+                                access_token: &AccessToken,
+                                user_email: S,
+                                password: S,
+                                remember_me: bool)
+                                -> Result<AccessToken> {
+        if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let dto: Login = Login {
+                user_email: String::from(user_email.as_ref()),
+                password: String::from(password.as_ref()),
+                remember_me: remember_me,
+            };
+            let mut response = try!(self.send_request(Method::Post,
+                                                      format!("{}login", self.url),
+                                                      headers,
+                                                      Some(json::encode(&dto).unwrap())));
+
+            match response.status {
+                StatusCode::Ok => {
+                    let mut response_str = String::new();
+                    let _ = try!(response.read_to_string(&mut response_str));
+                    Ok(try!(AccessToken::from_dto(try!(json::decode(&response_str)))))
                 }
                 StatusCode::Unauthorized => Err(Error::Unauthorized),
                 StatusCode::Accepted => {
@@ -208,8 +435,88 @@ impl ClientV1 {
                 StatusCode::Ok => {
                     let mut response_str = String::new();
                     let _ = try!(response.read_to_string(&mut response_str));
-                    let transactions: Vec<Transaction> = try!(json::decode(&response_str));
-                    Ok(transactions.into_iter().collect())
+                    let transactions: Vec<TransactionDTO> = try!(json::decode(&response_str));
+                    Ok(transactions.into_iter()
+                        .map(|t| Transaction::from_dto(t).unwrap())
+                        .collect())
+                }
+                StatusCode::Unauthorized => Err(Error::Unauthorized),
+                StatusCode::Accepted => {
+                    let mut response_str = String::new();
+                    let _ = try!(response.read_to_string(&mut response_str));
+                    match json::decode::<ResponseDTO>(&response_str) {
+                        Ok(r) => Err(Error::ClientError(r)),
+                        Err(e) => Err(e.into()),
+                    }
+                }
+                _ => Err(Error::ServerError),
+            }
+        } else {
+            Err(Error::Unauthorized)
+        }
+    }
+
+    /// Gets all the pending friend requests for the given user.
+    pub fn get_friend_requests(&self,
+                               access_token: &AccessToken,
+                               user_id: u64)
+                               -> Result<Vec<PendingFriendRequest>> {
+        if access_token.scopes().any(|s| match s {
+            &Scope::User(u_id) => u_id == user_id,
+            &Scope::Admin => true,
+            _ => false,
+        }) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let mut response =
+                try!(self.send_request(Method::Get,
+                                       format!("{}pending_connections/{}", self.url, user_id),
+                                       headers,
+                                       None));
+            match response.status {
+                StatusCode::Ok => {
+                    let mut response_str = String::new();
+                    let _ = try!(response.read_to_string(&mut response_str));
+                    let connections: Vec<PendingFriendRequestDTO> =
+                        try!(json::decode(&response_str));
+                    Ok(connections.into_iter()
+                        .map(|t| PendingFriendRequest::from_dto(t).unwrap())
+                        .collect())
+                }
+                StatusCode::Unauthorized => Err(Error::Unauthorized),
+                StatusCode::Accepted => {
+                    let mut response_str = String::new();
+                    let _ = try!(response.read_to_string(&mut response_str));
+                    match json::decode::<ResponseDTO>(&response_str) {
+                        Ok(r) => Err(Error::ClientError(r)),
+                        Err(e) => Err(e.into()),
+                    }
+                }
+                _ => Err(Error::ServerError),
+            }
+        } else {
+            Err(Error::Unauthorized)
+        }
+    }
+
+    /// Gets all users from the database.
+    pub fn get_all_users(&self, access_token: &AccessToken) -> Result<Vec<User>> {
+        if access_token.scopes().any(|s| s == &Scope::Admin) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let mut response = try!(self.send_request(Method::Get,
+                    format!("{}all_users", self.url), headers, None));
+            match response.status {
+                StatusCode::Ok => {
+                    let mut response_str = String::new();
+                    let _ = try!(response.read_to_string(&mut response_str));
+                    let dto_users: Vec<UserDTO> = try!(json::decode(&response_str));
+                    Ok(dto_users.into_iter()
+                        .filter_map(|u| match User::from_dto(u) {
+                            Ok(u) => Some(u),
+                            Err(_) => None,
+                        })
+                        .collect())
                 }
                 StatusCode::Unauthorized => Err(Error::Unauthorized),
                 StatusCode::Accepted => {
@@ -270,229 +577,6 @@ impl ClientV1 {
                         Err(e) => Err(e.into()),
                     }
                 }
-                _ => Err(Error::ServerError),
-            }
-        } else {
-            Err(Error::Unauthorized)
-        }
-    }
-
-    /// Logs the user in
-    pub fn login<S: AsRef<str>>(&self,
-                                access_token: &AccessToken,
-                                user_email: S,
-                                password: S,
-                                remember_me: bool)
-                                -> Result<AccessToken> {
-        if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
-            let mut headers = Headers::new();
-            headers.set(Authorization(access_token.get_token()));
-            let dto: Login = Login {
-                user_email: String::from(user_email.as_ref()),
-                password: String::from(password.as_ref()),
-                remember_me: remember_me,
-            };
-            let mut response = try!(self.send_request(Method::Post,
-                                                      format!("{}login", self.url),
-                                                      headers,
-                                                      Some(json::encode(&dto).unwrap())));
-
-            match response.status {
-                StatusCode::Ok => {
-                    let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    Ok(try!(AccessToken::from_dto(try!(json::decode(&response_str)))))
-                }
-                StatusCode::Unauthorized => Err(Error::Unauthorized),
-                StatusCode::Accepted => {
-                    let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    match json::decode::<ResponseDTO>(&response_str) {
-                        Ok(r) => Err(Error::ClientError(r)),
-                        Err(e) => Err(e.into()),
-                    }
-                }
-                _ => Err(Error::ServerError),
-            }
-        } else {
-            Err(Error::Unauthorized)
-        }
-    }
-
-    /// Begins a the reset password procecss
-    pub fn start_reset_password<S: AsRef<str>>(&self,
-                                               access_token: &AccessToken,
-                                               username: S,
-                                               email: S)
-                                               -> Result<()> {
-        if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
-            let mut headers = Headers::new();
-            headers.set(Authorization(access_token.get_token()));
-            let dto: ResetPassword = ResetPassword {
-                username: String::from(username.as_ref()),
-                email: String::from(email.as_ref()),
-            };
-            let mut response = try!(self.send_request(Method::Post,
-                                                      format!("{}start_reset_password", self.url),
-                                                      headers,
-                                                      Some(json::encode(&dto).unwrap())));
-
-            match response.status {
-                StatusCode::Ok => Ok(()),
-                StatusCode::Unauthorized => Err(Error::Unauthorized),
-                StatusCode::Accepted => {
-                    let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    match json::decode::<ResponseDTO>(&response_str) {
-                        Ok(r) => Err(Error::ClientError(r)),
-                        Err(e) => Err(e.into()),
-                    }
-                }
-                _ => Err(Error::ServerError),
-            }
-        } else {
-            Err(Error::Unauthorized)
-        }
-    }
-
-    /// Resends the email confirmation
-    pub fn resend_email_confirmation(&self, access_token: &AccessToken) -> Result<()> {
-        let mut user_id = None;
-        for scope in access_token.scopes() {
-            match scope {
-                &Scope::User(id) => user_id = Some(id),
-                _ => {}
-            }
-        }
-        if user_id.is_some() && !access_token.has_expired() {
-            let mut headers = Headers::new();
-            headers.set(Authorization(access_token.get_token()));
-            let response = try!(self.send_request(Method::Get,
-                                                  format!("{}resend_email_confirmation",
-                                                          self.url),
-                                                  headers,
-                                                  None));
-
-            match response.status {
-                StatusCode::Ok => Ok(()),
-                StatusCode::Unauthorized => Err(Error::Unauthorized),
-                _ => Err(Error::ServerError),
-            }
-        } else {
-            Err(Error::Unauthorized)
-        }
-    }
-
-    /// Get the user
-    pub fn get_user(&self, access_token: &AccessToken, user_id: u64) -> Result<User> {
-        if access_token.scopes().any(|s| match s {
-            &Scope::User(u_id) => u_id == user_id,
-            &Scope::Admin => true,
-            _ => false,
-        }) && !access_token.has_expired() {
-            let mut headers = Headers::new();
-            headers.set(Authorization(access_token.get_token()));
-            let mut response = try!(self.send_request(Method::Get,
-                                                      format!("{}user/{}", self.url, user_id),
-                                                      headers,
-                                                      None));
-
-            match response.status {
-                StatusCode::Ok => {
-                    let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    Ok(try!(User::from_dto(try!(json::decode::<UserDTO>(&response_str)))))
-                }
-                StatusCode::Accepted => {
-                    let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    match json::decode::<ResponseDTO>(&response_str) {
-                        Ok(r) => Err(Error::ClientError(r)),
-                        Err(e) => Err(e.into()),
-                    }
-                }
-                StatusCode::Unauthorized => Err(Error::Unauthorized),
-                _ => Err(Error::ServerError),
-            }
-        } else {
-            Err(Error::Unauthorized)
-        }
-    }
-
-
-    /// Gets the logged in users info
-    pub fn get_me(&self, access_token: &AccessToken) -> Result<User> {
-        if access_token.scopes().any(|s| match s {
-            &Scope::User(_) => true,
-            _ => false,
-        }) && !access_token.has_expired() {
-            let mut headers = Headers::new();
-            headers.set(Authorization(access_token.get_token()));
-            let mut user_id = 0;
-            for scope in access_token.scopes() {
-                match scope {
-                    &Scope::User(id) => user_id = id,
-                    _ => {}
-                }
-            }
-            let mut response = try!(self.send_request(Method::Get,
-                                                      format!("{}user/{}", self.url, user_id),
-                                                      headers,
-                                                      None));
-
-            match response.status {
-                StatusCode::Ok => {
-                    let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    Ok(try!(User::from_dto(try!(json::decode::<UserDTO>(&response_str)))))
-                }
-                StatusCode::Accepted => {
-                    let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    match json::decode::<ResponseDTO>(&response_str) {
-                        Ok(r) => Err(Error::ClientError(r)),
-                        Err(e) => Err(e.into()),
-                    }
-                }
-                StatusCode::Unauthorized => Err(Error::Unauthorized),
-                _ => Err(Error::ServerError),
-            }
-        } else {
-            Err(Error::Unauthorized)
-        }
-    }
-
-    /// Registers the user
-    pub fn register<S: AsRef<str>>(&self,
-                                   access_token: &AccessToken,
-                                   username: S,
-                                   password: S,
-                                   email: S)
-                                   -> Result<()> {
-        if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
-            let mut headers = Headers::new();
-            headers.set(Authorization(access_token.get_token()));
-            let register: Register = Register {
-                username: String::from(username.as_ref()),
-                password: String::from(password.as_ref()),
-                email: String::from(email.as_ref()),
-            };
-            let mut response = try!(self.send_request(Method::Post,
-                                                      format!("{}register", self.url),
-                                                      headers,
-                                                      Some(json::encode(&register).unwrap())));
-
-            match response.status {
-                StatusCode::Ok => Ok(()),
-                StatusCode::Accepted => {
-                    let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    match json::decode::<ResponseDTO>(&response_str) {
-                        Ok(r) => Err(Error::ClientError(r)),
-                        Err(e) => Err(e.into()),
-                    }
-                }
-                StatusCode::Unauthorized => Err(Error::Unauthorized),
                 _ => Err(Error::ServerError),
             }
         } else {
@@ -889,24 +973,29 @@ impl ClientV1 {
     }
 
     /// Creates a pending invitation to connect to the user
-    pub fn invite_user_to_connect(&self,
-                                  access_token: &AccessToken,
-                                  user: u64,
-                                  relation: Relationship)
-                                  -> Result<()> {
+    pub fn invite_user_to_connect<S: AsRef<str>>(&self,
+                                                 access_token: &AccessToken,
+                                                 user: u64,
+                                                 relation: Relationship,
+                                                 message: Option<S>)
+                                                 -> Result<()> {
         if access_token.scopes().any(|s| match s {
             &Scope::User(_) => true,
             _ => false,
         }) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let dto: ConnectionInvitation = ConnectionInvitation {
+            let dto = FriendRequestDTO {
                 origin_id: access_token.scopes().fold(0, |acc, s| match s {
                     &Scope::User(id) => id,
                     _ => acc,
                 }),
                 destination_id: user,
                 relationship: relation,
+                message: match message {
+                    Some(m) => Some(String::from(m.as_ref())),
+                    None => None,
+                },
             };
             let mut response = try!(self.send_request(Method::Post,
                                                       format!("{}create_pending_connection",
@@ -934,18 +1023,18 @@ impl ClientV1 {
     }
 
     /// Confirms a connection
-    pub fn confirm_connection(&self,
-                              access_token: &AccessToken,
-                              connection_id: u64,
-                              user: u64)
-                              -> Result<()> {
+    pub fn confirm_friend_request(&self,
+                                  access_token: &AccessToken,
+                                  connection_id: u64,
+                                  user: u64)
+                                  -> Result<()> {
         if access_token.scopes().any(|s| match s {
             &Scope::User(_) => true,
             _ => false,
         }) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let dto: ConfirmConnection = ConfirmConnection {
+            let dto: ConfirmFriendRequest = ConfirmFriendRequest {
                 origin: user,
                 destination: access_token.scopes().fold(0, |acc, s| match s {
                     &Scope::User(id) => id,
@@ -1114,6 +1203,7 @@ impl ClientV1 {
         }
     }
 
+    /// Authenticates the user with 2FA
     pub fn authenticate(&self, access_token: &AccessToken, user_id: u64, code: u32) -> Result<()> {
         if access_token.scopes().any(|s| match s {
             &Scope::User(_) => true,
@@ -1131,14 +1221,7 @@ impl ClientV1 {
                                        headers,
                                        Some(json::encode(&dto).unwrap())));
             match response.status {
-                StatusCode::Ok => {
-                    let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    match json::decode::<ResponseDTO>(&response_str) {
-                        Ok(r) => Ok(r.message),
-                        Err(e) => Err(e.into()),
-                    }
-                }
+                StatusCode::Ok => Ok(()),
                 StatusCode::Accepted => {
                     let mut response_str = String::new();
                     let _ = try!(response.read_to_string(&mut response_str));
