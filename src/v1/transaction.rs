@@ -8,11 +8,11 @@ use rustc_serialize::json;
 use utils::{WalletAddress, Amount};
 use dto::{FromDTO, ScopeDTO as Scope, ResponseDTO, GenerateTransactionDTO, TransactionDTO};
 
-use super::Client;
+use super::{Client, VoidDTO};
 
 use error::{Result, Error};
-use types::Transaction;
-use oauth::AccessToken;
+use super::types::Transaction;
+use super::oauth::AccessToken;
 
 /// Methods for working with transactions.
 impl Client {
@@ -31,7 +31,7 @@ impl Client {
                 try!(self.send_request(Method::Get,
                                        format!("{}transaction/{}", self.url, transaction_id),
                                        headers,
-                                       None));
+                                       None::<&VoidDTO>));
             match response.status {
                 StatusCode::Ok => {
                     let mut response_str = String::new();
@@ -72,7 +72,7 @@ impl Client {
             let mut response = try!(self.send_request(Method::Post,
                                                       format!("{}new_transaction", self.url),
                                                       headers,
-                                                      Some(json::encode(&dto).unwrap())));
+                                                      Some(&dto)));
 
             match response.status {
                 StatusCode::Ok => {
@@ -110,7 +110,7 @@ impl Client {
                                                               self.url,
                                                               first_transaction),
                                                       headers,
-                                                      None));
+                                                      None::<&VoidDTO>));
             match response.status {
                 StatusCode::Ok => {
                     let mut response_str = String::new();

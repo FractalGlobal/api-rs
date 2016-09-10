@@ -15,8 +15,6 @@ extern crate fractal_dto as dto;
 extern crate fractal_utils as utils;
 
 pub mod error;
-pub mod types;
-pub mod oauth;
 pub mod v1;
 
 pub use v1::Client;

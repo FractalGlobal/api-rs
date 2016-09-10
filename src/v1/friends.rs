@@ -8,10 +8,10 @@ use rustc_serialize::json;
 use dto::{FromDTO, ScopeDTO as Scope, PendingFriendRequestDTO, FriendRequestDTO,
           ConfirmFriendRequestDTO, ResponseDTO, RelationshipDTO as Relationship};
 
-use super::Client;
-use types::PendingFriendRequest;
 use error::{Result, Error};
-use oauth::AccessToken;
+use super::{Client, VoidDTO};
+use super::types::PendingFriendRequest;
+use super::oauth::AccessToken;
 
 
 /// Methods for working with friend requests.
@@ -45,7 +45,7 @@ impl Client {
                                                       format!("{}create_pending_connection",
                                                               self.url),
                                                       headers,
-                                                      Some(json::encode(&dto).unwrap())));
+                                                      Some(&dto)));
 
             match response.status {
                 StatusCode::Ok => Ok(()),
@@ -91,7 +91,7 @@ impl Client {
                                    self.url,
                                   ),
                                                       headers,
-                                                      Some(json::encode(&dto).unwrap())));
+                                                      Some(&dto)));
 
             match response.status {
                 StatusCode::Ok => Ok(()),
@@ -132,7 +132,7 @@ impl Client {
                 try!(self.send_request(Method::Get,
                                        format!("{}friend_requests/{}", self.url, user_id),
                                        headers,
-                                       None));
+                                       None::<&VoidDTO>));
             match response.status {
                 StatusCode::Ok => {
                     let mut response_str = String::new();

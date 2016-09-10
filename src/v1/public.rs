@@ -10,11 +10,11 @@ use rustc_serialize::json;
 use dto::{FromDTO, ScopeDTO as Scope, LoginDTO, RegisterDTO, ResetPasswordDTO, ResponseDTO,
           NewPasswordDTO, CreateClientDTO, ClientInfoDTO};
 
-use super::{Client, SECRET_LEN};
+use super::{Client, VoidDTO, SECRET_LEN};
 
 use error::{Result, Error};
-use types::ClientInfo;
-use oauth::AccessToken;
+use super::types::ClientInfo;
+use super::oauth::AccessToken;
 
 /// Public methods for the client.
 ///
@@ -36,9 +36,9 @@ impl Client {
                         password: Some(String::from(secret.as_ref())),
                     }));
                     let mut response = try!(self.send_request(Method::Post,
-                                               format!("{}token", self.url).as_str(),
-                                               headers,
-                                               Some("grant_type=client_credentials")));
+                                                              format!("{}token", self.url),
+                                                              headers,
+                                                              None::<&VoidDTO>));
 
                     match response.status {
                         StatusCode::Ok => {
@@ -80,7 +80,7 @@ impl Client {
             let mut response = try!(self.send_request(Method::Post,
                                                       format!("{}create_client", self.url),
                                                       headers,
-                                                      Some(json::encode(&dto).unwrap())));
+                                                      Some(&dto)));
             match response.status {
                 StatusCode::Ok => {
                     let mut response_str = String::new();
@@ -106,7 +106,7 @@ impl Client {
         if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let register = RegisterDTO {
+            let dto = RegisterDTO {
                 username: String::from(username.as_ref()),
                 password: String::from(password.as_ref()),
                 email: String::from(email.as_ref()),
@@ -114,7 +114,7 @@ impl Client {
             let mut response = try!(self.send_request(Method::Post,
                                                       format!("{}register", self.url),
                                                       headers,
-                                                      Some(json::encode(&register).unwrap())));
+                                                      Some(&dto)));
 
             match response.status {
                 StatusCode::Ok => Ok(()),
@@ -154,7 +154,7 @@ impl Client {
             let mut response = try!(self.send_request(Method::Post,
                                                       format!("{}login", self.url),
                                                       headers,
-                                                      Some(json::encode(&dto).unwrap())));
+                                                      Some(&dto)));
 
             match response.status {
                 StatusCode::Ok => {
@@ -194,7 +194,7 @@ impl Client {
                                                   format!("{}resend_email_confirmation",
                                                           self.url),
                                                   headers,
-                                                  None));
+                                                  None::<&VoidDTO>));
 
             match response.status {
                 StatusCode::Ok => Ok(()),
@@ -219,7 +219,7 @@ impl Client {
                                                               self.url,
                                                               email_key.as_ref()),
                                                       headers,
-                                                      None));
+                                                      None::<&VoidDTO>));
 
             match response.status {
                 StatusCode::Ok => Ok(()),
@@ -255,7 +255,7 @@ impl Client {
             let mut response = try!(self.send_request(Method::Post,
                                                       format!("{}start_reset_password", self.url),
                                                       headers,
-                                                      Some(json::encode(&dto).unwrap())));
+                                                      Some(&dto)));
 
             match response.status {
                 StatusCode::Ok => Ok(()),
@@ -290,7 +290,7 @@ impl Client {
                                                               self.url,
                                                               password_key.as_ref()),
                                                       headers,
-                                                      Some(json::encode(&dto).unwrap())));
+                                                      Some(&dto)));
 
             match response.status {
                 StatusCode::Ok => Ok(()),

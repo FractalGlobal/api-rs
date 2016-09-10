@@ -10,11 +10,11 @@ use chrono::{NaiveDate, UTC};
 use utils::Address;
 use dto::{FromDTO, UserDTO, ScopeDTO as Scope, AuthenticationCodeDTO, ResponseDTO, UpdateUserDTO};
 
-use super::Client;
+use super::{Client, VoidDTO};
 
 use error::{Result, Error};
-use types::User;
-use oauth::AccessToken;
+use super::types::User;
+use super::oauth::AccessToken;
 
 /// User methods for the client.
 ///
@@ -32,7 +32,7 @@ impl Client {
             let mut response = try!(self.send_request(Method::Get,
                                                       format!("{}user/{}", self.url, user_id),
                                                       headers,
-                                                      None));
+                                                      None::<&VoidDTO>));
 
             match response.status {
                 StatusCode::Ok => {
@@ -74,7 +74,7 @@ impl Client {
             let mut response = try!(self.send_request(Method::Get,
                                                       format!("{}user/{}", self.url, user_id),
                                                       headers,
-                                                      None));
+                                                      None::<&VoidDTO>));
 
             match response.status {
                 StatusCode::Ok => {
@@ -104,7 +104,9 @@ impl Client {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let mut response = try!(self.send_request(Method::Get,
-                    format!("{}all_users", self.url), headers, None));
+                                                      format!("{}all_users", self.url),
+                                                      headers,
+                                                      None::<&VoidDTO>));
             match response.status {
                 StatusCode::Ok => {
                     let mut response_str = String::new();
@@ -141,7 +143,7 @@ impl Client {
             let response = try!(self.send_request(Method::Delete,
                                                   format!("{}user/{}", self.url, user_id),
                                                   headers,
-                                                  None));
+                                                  None::<&VoidDTO>));
             match response.status {
                 StatusCode::Ok => Ok(()),
                 StatusCode::Unauthorized => Err(Error::Unauthorized),
@@ -169,7 +171,7 @@ impl Client {
                 try!(self.send_request(Method::Get,
                                        format!("{}authenticator/{}", self.url, user_id),
                                        headers,
-                                       None));
+                                       None::<&VoidDTO>));
             match response.status {
                 StatusCode::Ok => {
                     let mut response_str = String::new();
@@ -212,7 +214,7 @@ impl Client {
                 try!(self.send_request(Method::Post,
                                        format!("{}authenticate/{}", self.url, user_id),
                                        headers,
-                                       Some(json::encode(&dto).unwrap())));
+                                       Some(&dto)));
             match response.status {
                 StatusCode::Ok => Ok(()),
                 StatusCode::Accepted => {
@@ -265,7 +267,7 @@ impl Client {
             let response = try!(self.send_request(Method::Post,
                                                   format!("{}update_user/{}", self.url, user_id),
                                                   headers,
-                                                  Some(json::encode(&dto).unwrap())));
+                                                  Some(&dto)));
 
             match response.status {
                 StatusCode::Ok => {
@@ -314,7 +316,7 @@ impl Client {
             let response = try!(self.send_request(Method::Post,
                                                   format!("{}update_user/{}", self.url, user_id),
                                                   headers,
-                                                  Some(json::encode(&dto).unwrap())));
+                                                  Some(&dto)));
             match response.status {
                 StatusCode::Ok => {
                     // let mut response_str = String::new();
@@ -362,7 +364,7 @@ impl Client {
             let response = try!(self.send_request(Method::Post,
                                                   format!("{}update_user/{}", self.url, user_id),
                                                   headers,
-                                                  Some(json::encode(&dto).unwrap())));
+                                                  Some(&dto)));
             match response.status {
                 StatusCode::Ok => {
                     // let mut response_str = String::new();
@@ -411,7 +413,7 @@ impl Client {
             let response = try!(self.send_request(Method::Post,
                                                   format!("{}update_user/{}", self.url, user_id),
                                                   headers,
-                                                  Some(json::encode(&dto).unwrap())));
+                                                  Some(&dto)));
             match response.status {
                 StatusCode::Ok => {
                     // let mut response_str = String::new();
@@ -459,7 +461,7 @@ impl Client {
             let response = try!(self.send_request(Method::Post,
                                                   format!("{}update_user/{}", self.url, user_id),
                                                   headers,
-                                                  Some(json::encode(&dto).unwrap())));
+                                                  Some(&dto)));
             match response.status {
                 StatusCode::Ok => {
                     // let mut response_str = String::new();
@@ -507,7 +509,7 @@ impl Client {
             let response = try!(self.send_request(Method::Post,
                                                   format!("{}update_user/{}", self.url, user_id),
                                                   headers,
-                                                  Some(json::encode(&dto).unwrap())));
+                                                  Some(&dto)));
             match response.status {
                 StatusCode::Ok => {
                     // let mut response_str = String::new();
@@ -555,7 +557,7 @@ impl Client {
             let response = try!(self.send_request(Method::Post,
                                                   format!("{}update_user/{}", self.url, user_id),
                                                   headers,
-                                                  Some(json::encode(&dto).unwrap())));
+                                                  Some(&dto)));
             match response.status {
                 StatusCode::Ok => {
                     // let mut response_str = String::new();
@@ -604,7 +606,7 @@ impl Client {
                                                                   _ => acc,
                                                               })),
                                                   headers,
-                                                  Some(json::encode(&dto).unwrap())));
+                                                  Some(&dto)));
 
             match response.status {
                 StatusCode::Ok => {
