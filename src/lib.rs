@@ -28,11 +28,11 @@ use rustc_serialize::base64::FromBase64;
 use rustc_serialize::json;
 use dto::{FromDTO, UserDTO, ScopeDTO as Scope, GenerateTransactionDTO as GenerateTransaction,
           LoginDTO as Login, RegisterDTO as Register, UpdateUserDTO as UpdateUser,
-          FractalConnectionDTO as ConnectionInvitation,
-          ConfirmPendingConnectionDTO as ConfirmConnection, ResetPasswordDTO as ResetPassword,
-          ResponseDTO, NewPasswordDTO as NewPassword};
+          FriendRequestDTO as FriendRequest, ConfirmPendingConnectionDTO as ConfirmConnection,
+          ResetPasswordDTO as ResetPassword, ResponseDTO, NewPasswordDTO as NewPassword,
+          AuthenticationCodeDTO as AuthenticationCode};
 
-use chrono::NaiveDate;
+use chrono::{NaiveDate, UTC, DateTime};
 
 pub mod error;
 pub mod types;
@@ -1067,6 +1067,90 @@ impl ClientV1 {
                 StatusCode::Unauthorized => Err(Error::Unauthorized),
                 _ => Err(Error::ServerError),
             }
+        } else {
+            Err(Error::Unauthorized)
+        }
+    }
+
+    /// Gets the authenticator qrcode to scan for 2 factor authentication
+    pub fn get_authenticator_qrcode(&self,
+                                    access_token: &AccessToken,
+                                    user_id: u64)
+                                    -> Result<String> {
+        if access_token.scopes().any(|s| match s {
+            &Scope::User(_) => true,
+            _ => false,
+        }) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let mut response =
+                try!(self.send_request(Method::Get,
+                                       format!("{}authenticator/{}", self.url, user_id),
+                                       headers,
+                                       None));
+            match response.status {
+                StatusCode::Ok => {
+                    let mut response_str = String::new();
+                    let _ = try!(response.read_to_string(&mut response_str));
+                    match json::decode::<ResponseDTO>(&response_str) {
+                        Ok(r) => Ok(r.message),
+                        Err(e) => Err(e.into()),
+                    }
+                }
+                StatusCode::Accepted => {
+                    let mut response_str = String::new();
+                    let _ = try!(response.read_to_string(&mut response_str));
+                    match json::decode::<ResponseDTO>(&response_str) {
+                        Ok(r) => Err(Error::ClientError(r)),
+                        Err(e) => Err(e.into()),
+                    }
+                }
+                StatusCode::Unauthorized => Err(Error::Unauthorized),
+                _ => Err(Error::ServerError),
+            }
+
+        } else {
+            Err(Error::Unauthorized)
+        }
+    }
+
+    pub fn authenticate(&self, access_token: &AccessToken, user_id: u64, code: u32) -> Result<()> {
+        if access_token.scopes().any(|s| match s {
+            &Scope::User(_) => true,
+            _ => false,
+        }) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let dto = AuthenticationCode {
+                code: code,
+                timestamp: UTC::now(),
+            };
+            let mut response =
+                try!(self.send_request(Method::Post,
+                                       format!("{}authenticate/{}", self.url, user_id),
+                                       headers,
+                                       Some(json::encode(&dto).unwrap())));
+            match response.status {
+                StatusCode::Ok => {
+                    let mut response_str = String::new();
+                    let _ = try!(response.read_to_string(&mut response_str));
+                    match json::decode::<ResponseDTO>(&response_str) {
+                        Ok(r) => Ok(r.message),
+                        Err(e) => Err(e.into()),
+                    }
+                }
+                StatusCode::Accepted => {
+                    let mut response_str = String::new();
+                    let _ = try!(response.read_to_string(&mut response_str));
+                    match json::decode::<ResponseDTO>(&response_str) {
+                        Ok(r) => Err(Error::ClientError(r)),
+                        Err(e) => Err(e.into()),
+                    }
+                }
+                StatusCode::Unauthorized => Err(Error::Unauthorized),
+                _ => Err(Error::ServerError),
+            }
+
         } else {
             Err(Error::Unauthorized)
         }
