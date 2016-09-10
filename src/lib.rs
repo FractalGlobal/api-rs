@@ -1,3 +1,6 @@
+#![doc(html_logo_url = "http://test.fractal.global/img/logo.svg",
+       html_favicon_url = "http://test.fractal.global/img/favicon32.png",
+       html_root_url = "http://fractal.global/api-rs/")]
 //! Fractal Global Credits API.
 
 #![forbid(missing_docs, warnings)]
