@@ -411,7 +411,7 @@ impl json::ToJson for User {
                 let _ = object.insert(String::from("first_name_confirmed"), c.to_json());
             }
             None => {
-                let _ = object.insert(String::from("first_name"), None.to_json());
+                let _ = object.insert(String::from("first_name"), None::<String>.to_json());
                 let _ = object.insert(String::from("first_name_confirmed"), false.to_json());
             }
         }
@@ -421,26 +421,34 @@ impl json::ToJson for User {
                 let _ = object.insert(String::from("first_name_confirmed"), c.to_json());
             }
             None => {
-                let _ = object.insert(String::from("first_name"), None.to_json());
+                let _ = object.insert(String::from("first_name"), None::<String>.to_json());
                 let _ = object.insert(String::from("first_name_confirmed"), false.to_json());
             }
         }
         let _ = object.insert(String::from("device_count"), self.device_count.to_json());
-        let _ = object.insert(String::from("wallet_addresses"),
-                              self.wallet_addresses.to_json());
+        let _ =
+            object.insert(String::from("wallet_addresses"),
+                          self.wallet_addresses.iter().map(|a| *a).collect::<Vec<_>>().to_json());
         let _ = object.insert(String::from("pending_balance"),
                               self.pending_balance.to_json());
         let _ = object.insert(String::from("checking_balance"),
                               self.checking_balance.to_json());
         let _ = object.insert(String::from("cold_balance"), self.cold_balance.to_json());
-        let _ = object.insert(String::from("bonds"), self.bonds.to_json());
+        let mut bonds_map = Vec::new();
+        for (time, count) in self.bonds.iter() {
+            let mut object = json::Object::new();
+            let _ = object.insert(String::from("timestamp"), time_to_json(*time));
+            let _ = object.insert(String::from("count"), count.to_json());
+            bonds_map.push(json::Json::Object(object));
+        }
+        let _ = object.insert(String::from("bonds"), bonds_map.to_json());
         match self.birthday {
             Some((ref b, c)) => {
-                let _ = object.insert(String::from("birthday"), b.to_json());
+                let _ = object.insert(String::from("birthday"), date_to_json(*b));
                 let _ = object.insert(String::from("birthday_confirmed"), c.to_json());
             }
             None => {
-                let _ = object.insert(String::from("birthday"), None.to_json());
+                let _ = object.insert(String::from("birthday"), None::<String>.to_json());
                 let _ = object.insert(String::from("birthday_confirmed"), false.to_json());
             }
         }
@@ -450,7 +458,7 @@ impl json::ToJson for User {
                 let _ = object.insert(String::from("phone_confirmed"), c.to_json());
             }
             None => {
-                let _ = object.insert(String::from("phone"), None.to_json());
+                let _ = object.insert(String::from("phone"), None::<String>.to_json());
                 let _ = object.insert(String::from("phone_confirmed"), false.to_json());
             }
         }
@@ -461,7 +469,7 @@ impl json::ToJson for User {
                 let _ = object.insert(String::from("address_confirmed"), c.to_json());
             }
             None => {
-                let _ = object.insert(String::from("address"), None.to_json());
+                let _ = object.insert(String::from("address"), None::<String>.to_json());
                 let _ = object.insert(String::from("address_confirmed"), false.to_json());
             }
         }
@@ -469,10 +477,19 @@ impl json::ToJson for User {
         let _ = object.insert(String::from("trust_score"), self.trust_score.to_json());
         let _ = object.insert(String::from("enabled"), self.enabled.to_json());
         let _ = object.insert(String::from("registration_time"),
-                              self.registration_time.to_json());
-        let _ = object.insert(String::from("last_activity"), self.last_activity.to_json());
+                              time_to_json(self.registration_time));
+        let _ = object.insert(String::from("last_activity"),
+                              time_to_json(self.last_activity));
         let _ = object.insert(String::from("is_banned"), self.is_banned().to_json());
-        let _ = object.insert(String::from("ban_end"), self.banned.to_json());
+        match self.banned {
+            Some(d) => {
+                let _ = object.insert(String::from("ban_end"), time_to_json(d));
+            }
+            None => {
+                let _ = object.insert(String::from("ban_end"), None::<String>.to_json());
+            }
+        }
+
 
         json::Json::Object(object)
     }
@@ -589,7 +606,7 @@ impl json::ToJson for Transaction {
         let _ = object.insert(String::from("destination_address"),
                               self.destination_address.to_json());
         let _ = object.insert(String::from("amount"), self.amount.to_json());
-        let _ = object.insert(String::from("timestamp"), self.timestamp.to_json());
+        let _ = object.insert(String::from("timestamp"), time_to_json(self.timestamp));
         json::Json::Object(object)
     }
 }
@@ -597,7 +614,7 @@ impl json::ToJson for Transaction {
 impl FromDTO<TransactionDTO> for Transaction {
     fn from_dto(dto: TransactionDTO) -> StdResult<Transaction, FromDTOError> {
         Ok(Transaction {
-            transaction_id: dto.id,
+            transaction_id: dto.transaction_id,
             origin_user: try!(Profile::from_dto(dto.origin_user)),
             destination_user: try!(Profile::from_dto(dto.destination_user)),
             destination_address: dto.destination_address,
@@ -646,4 +663,32 @@ impl FromDTO<PendingFriendRequestDTO> for PendingFriendRequest {
             message: dto.message,
         })
     }
+}
+
+#[cfg(feature = "json-types")]
+fn time_to_json(time: DateTime<UTC>) -> json::Json {
+    use chrono::{Timelike, Datelike};
+    use rustc_serialize::json::ToJson;
+
+    let mut object = json::Object::new();
+    let _ = object.insert(String::from("day"), time.day().to_json());
+    let _ = object.insert(String::from("mon"), time.month().to_json());
+    let _ = object.insert(String::from("year"), time.year().to_json());
+
+    let _ = object.insert(String::from("hour"), time.hour().to_json());
+    let _ = object.insert(String::from("min"), time.minute().to_json());
+    let _ = object.insert(String::from("sec"), time.second().to_json());
+    json::Json::Object(object)
+}
+
+#[cfg(feature = "json-types")]
+fn date_to_json(time: NaiveDate) -> json::Json {
+    use chrono::Datelike;
+    use rustc_serialize::json::ToJson;
+
+    let mut object = json::Object::new();
+    let _ = object.insert(String::from("day"), time.day().to_json());
+    let _ = object.insert(String::from("mon"), time.month().to_json());
+    let _ = object.insert(String::from("year"), time.year().to_json());
+    json::Json::Object(object)
 }

@@ -53,7 +53,7 @@ impl Client {
     /// Confirms a connection
     pub fn confirm_friend_request(&self,
                                   access_token: &AccessToken,
-                                  connection_id: u64,
+                                  request_id: u64,
                                   user: u64)
                                   -> Result<()> {
         if access_token.scopes().any(|s| match s {
@@ -63,12 +63,12 @@ impl Client {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let dto = ConfirmFriendRequestDTO {
+                request_id: request_id,
                 origin: user,
                 destination: access_token.scopes().fold(0, |acc, s| match s {
                     &Scope::User(id) => id,
                     _ => acc,
                 }),
-                id: connection_id,
             };
             let _ = try!(self.send_request(Method::Post,
                                            format!("{}confirm_friend_request",
