@@ -19,4 +19,8 @@ hyper = "^0.9"
 chrono = { version = "^0.2", features = ["rustc-serialize"]}
 rustc-serialize = "^0.3"
 fractal-utils = "^0.2"
-fractal-dto = "^0.1"
+fractal-dto = "^0.3"
+
+[features]
+default = ["json-types"]
+json-types = ["fractal-utils/json-types"]
