@@ -99,34 +99,6 @@ impl Client {
         }
     }
 
-    /// Resends the email confirmation
-    pub fn resend_email_confirmation(&self, access_token: &AccessToken) -> Result<()> {
-        let mut user_id = None;
-        for scope in access_token.scopes() {
-            match scope {
-                &Scope::User(id) => user_id = Some(id),
-                _ => {}
-            }
-        }
-        if user_id.is_some() && !access_token.has_expired() {
-            let mut headers = Headers::new();
-            headers.set(Authorization(access_token.get_token()));
-            let response = try!(self.send_request(Method::Get,
-                                                  format!("{}resend_email_confirmation",
-                                                          self.url),
-                                                  headers,
-                                                  None::<&VoidDTO>));
-
-            match response.status {
-                StatusCode::Ok => Ok(()),
-                StatusCode::Unauthorized => Err(Error::Unauthorized),
-                _ => Err(Error::ServerError),
-            }
-        } else {
-            Err(Error::Unauthorized)
-        }
-    }
-
     /// Confirms the users email
     pub fn confirm_email<S: AsRef<str>>(&self,
                                         access_token: &AccessToken,

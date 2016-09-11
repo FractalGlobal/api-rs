@@ -20,6 +20,34 @@ use super::oauth::AccessToken;
 ///
 /// This are the user getters, setters and creators for the client.
 impl Client {
+    /// Resends the email confirmation
+    pub fn resend_email_confirmation(&self, access_token: &AccessToken) -> Result<()> {
+        let mut user_id = None;
+        for scope in access_token.scopes() {
+            match scope {
+                &Scope::User(id) => user_id = Some(id),
+                _ => {}
+            }
+        }
+        if user_id.is_some() && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let response = try!(self.send_request(Method::Get,
+                                                  format!("{}resend_email_confirmation",
+                                                          self.url),
+                                                  headers,
+                                                  None::<&VoidDTO>));
+
+            match response.status {
+                StatusCode::Ok => Ok(()),
+                StatusCode::Unauthorized => Err(Error::Unauthorized),
+                _ => Err(Error::ServerError),
+            }
+        } else {
+            Err(Error::Unauthorized)
+        }
+    }
+
     /// Get the user
     pub fn get_user(&self, access_token: &AccessToken, user_id: u64) -> Result<User> {
         if access_token.scopes().any(|s| match s {
@@ -167,11 +195,12 @@ impl Client {
         }) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let mut response =
-                try!(self.send_request(Method::Get,
-                                       format!("{}authenticator/{}", self.url, user_id),
-                                       headers,
-                                       None::<&VoidDTO>));
+            let mut response = try!(self.send_request(Method::Get,
+                                                      format!("{}generate_authenticator_code/{}",
+                                                              self.url,
+                                                              user_id),
+                                                      headers,
+                                                      None::<&VoidDTO>));
             match response.status {
                 StatusCode::Ok => {
                     let mut response_str = String::new();
