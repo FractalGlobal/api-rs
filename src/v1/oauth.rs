@@ -7,9 +7,7 @@ use std::io::Read;
 
 use hyper::header::Bearer;
 use hyper::method::Method;
-use hyper::header::{Headers, Authorization, Basic, Accept, qitem};
-use hyper::mime::{Mime, TopLevel, SubLevel, Attr, Value};
-use hyper::status::StatusCode;
+use hyper::header::{Headers, Authorization, Basic};
 
 use chrono::{Duration, UTC, DateTime};
 use rustc_serialize::json;
@@ -102,28 +100,17 @@ impl Client {
             Ok(b) => {
                 if b.len() == SECRET_LEN {
                     let mut headers = Headers::new();
-                    headers.set(Accept(vec![
-                            qitem(Mime(TopLevel::Application, SubLevel::Json,
-                                       vec![(Attr::Charset, Value::Utf8)])),
-                        ]));
                     headers.set(Authorization(Basic {
                         username: String::from(app_id.as_ref()),
                         password: Some(String::from(secret.as_ref())),
                     }));
-                    let mut response = try!(self.send_request(Method::Post,
+                    let mut response = try!(self.send_request(Method::Get,
                                                               format!("{}token", self.url),
                                                               headers,
                                                               None::<&VoidDTO>));
-
-                    match response.status {
-                        StatusCode::Ok => {
-                            let mut response_str = String::new();
-                            let _ = try!(response.read_to_string(&mut response_str));
-                            Ok(try!(AccessToken::from_dto(try!(json::decode(&response_str)))))
-                        }
-                        StatusCode::Unauthorized => Err(Error::Unauthorized),
-                        _ => Err(Error::ServerError),
-                    }
+                    let mut response_str = String::new();
+                    let _ = try!(response.read_to_string(&mut response_str));
+                    Ok(try!(AccessToken::from_dto(try!(json::decode(&response_str)))))
                 } else {
                     Err(Error::InvalidSecret)
                 }
@@ -156,18 +143,12 @@ impl Client {
                                                       format!("{}create_client", self.url),
                                                       headers,
                                                       Some(&dto)));
-            match response.status {
-                StatusCode::Ok => {
-                    let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    let dto_client: ClientInfoDTO = try!(json::decode(&response_str));
-                    Ok(try!(ClientInfo::from_dto(dto_client)))
-                }
-                StatusCode::Unauthorized => Err(Error::Unauthorized),
-                _ => Err(Error::ServerError),
-            }
+            let mut response_str = String::new();
+            let _ = try!(response.read_to_string(&mut response_str));
+            let client_dto: ClientInfoDTO = try!(json::decode(&response_str));
+            Ok(try!(ClientInfo::from_dto(client_dto)))
         } else {
-            Err(Error::Unauthorized)
+            Err(Error::Forbidden(String::from("the token must be an unexpired admin token")))
         }
     }
 }

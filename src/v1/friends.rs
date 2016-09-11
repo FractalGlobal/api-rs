@@ -2,11 +2,10 @@ use std::io::Read;
 
 use hyper::method::Method;
 use hyper::header::{Headers, Authorization};
-use hyper::status::StatusCode;
 use rustc_serialize::json;
 
 use dto::{FromDTO, ScopeDTO as Scope, PendingFriendRequestDTO, FriendRequestDTO,
-          ConfirmFriendRequestDTO, ResponseDTO, RelationshipDTO as Relationship};
+          ConfirmFriendRequestDTO, RelationshipDTO as Relationship};
 
 use error::{Result, Error};
 use super::{Client, VoidDTO};
@@ -41,28 +40,13 @@ impl Client {
                     None => None,
                 },
             };
-            let mut response = try!(self.send_request(Method::Post,
-                                                      format!("{}create_friend_request",
-                                                              self.url),
-                                                      headers,
-                                                      Some(&dto)));
-
-            match response.status {
-                StatusCode::Ok => Ok(()),
-                StatusCode::Unauthorized => Err(Error::Unauthorized),
-                StatusCode::Accepted => {
-                    let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    match json::decode::<ResponseDTO>(&response_str) {
-                        Ok(r) => Err(Error::ClientError(r)),
-                        Err(e) => Err(e.into()),
-                    }
-
-                }
-                _ => Err(Error::ServerError),
-            }
+            let _ = try!(self.send_request(Method::Post,
+                                           format!("{}create_friend_request", self.url),
+                                           headers,
+                                           Some(&dto)));
+            Ok(())
         } else {
-            Err(Error::Unauthorized)
+            Err(Error::Forbidden(String::from("the token must be an unexpired user token")))
         }
     }
 
@@ -86,33 +70,15 @@ impl Client {
                 }),
                 id: connection_id,
             };
-            let mut response = try!(self.send_request(Method::Post,
-                                                      format!("{}confirm_friend_request",
+            let _ = try!(self.send_request(Method::Post,
+                                           format!("{}confirm_friend_request",
                                    self.url,
                                   ),
-                                                      headers,
-                                                      Some(&dto)));
-
-            match response.status {
-                StatusCode::Ok => Ok(()),
-                StatusCode::Unauthorized => {
-                    let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    Err(Error::Unauthorized)
-                }
-                StatusCode::Accepted => {
-                    let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    match json::decode::<ResponseDTO>(&response_str) {
-                        Ok(r) => Err(Error::ClientError(r)),
-                        Err(e) => Err(e.into()),
-                    }
-
-                }
-                _ => Err(Error::ServerError),
-            }
+                                           headers,
+                                           Some(&dto)));
+            Ok(())
         } else {
-            Err(Error::Unauthorized)
+            Err(Error::Forbidden(String::from("the token must be an unexpired user token")))
         }
     }
 
@@ -133,21 +99,16 @@ impl Client {
                                        format!("{}friend_requests/{}", self.url, user_id),
                                        headers,
                                        None::<&VoidDTO>));
-            match response.status {
-                StatusCode::Ok => {
-                    let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    let connections: Vec<PendingFriendRequestDTO> =
-                        try!(json::decode(&response_str));
-                    Ok(connections.into_iter()
-                        .map(|t| PendingFriendRequest::from_dto(t).unwrap())
-                        .collect())
-                }
-                StatusCode::Unauthorized => Err(Error::Unauthorized),
-                _ => Err(Error::ServerError),
-            }
+            let mut response_str = String::new();
+            let _ = try!(response.read_to_string(&mut response_str));
+            let connections: Vec<PendingFriendRequestDTO> = try!(json::decode(&response_str));
+            Ok(connections.into_iter()
+                .map(|t| PendingFriendRequest::from_dto(t).unwrap())
+                .collect())
         } else {
-            Err(Error::Unauthorized)
+            Err(Error::Forbidden(String::from("the token must be an unexpired user or admin \
+                                               token, and in the case of an user token, the ID \
+                                               in the token must be the same as the given ID")))
         }
     }
 }

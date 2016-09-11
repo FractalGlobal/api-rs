@@ -8,7 +8,7 @@ use std::error::Error as StdError;
 
 use hyper::error::Error as HyperError;
 use rustc_serialize::json;
-use dto::{FromDTOError, ResponseDTO};
+use dto::FromDTOError;
 
 /// The result type of the API.
 pub type Result<T> = StdResult<T, Error>;
@@ -24,12 +24,16 @@ pub enum Error {
     FromDTOError(FromDTOError),
     /// JSON decode error.
     JSONDecodeError(json::DecoderError),
+    /// Forbidden.
+    Forbidden(String),
+    /// Bad request
+    BadRequest(String),
     /// Error Logging in
-    ClientError(ResponseDTO),
-    /// Unauthorized.
-    Unauthorized,
+    ClientError(String),
+    /// Not found
+    NotFound(String),
     /// Internal server error.
-    ServerError,
+    ServerError(String),
     /// The token type is not valid.
     InvalidTokenType,
     /// The scope is not valid.
@@ -81,15 +85,17 @@ impl StdError for Error {
             Error::IO(ref e) => e.description(),
             Error::FromDTOError(ref e) => e.description(),
             Error::JSONDecodeError(ref e) => e.description(),
-            Error::ClientError(ref e) => &e.message,
-            Error::TransactionError => "Error Generating Transaction",
-            Error::RegistrationError => "Error Registering User",
-            Error::Unauthorized => "the provided token is not authorized to use the method",
-            Error::ServerError => "a server error occurred",
+            Error::Forbidden(ref e) => e,
+            Error::BadRequest(ref e) => e,
+            Error::ClientError(ref e) => e,
+            Error::NotFound(ref e) => e,
+            Error::ServerError(ref e) => e,
+            Error::TransactionError => "error generating transaction",
+            Error::RegistrationError => "error registering user",
             Error::InvalidTokenType => "the provided token type is not a valid token type",
             Error::InvalidScope => "the provided scope is not a valid scope",
             Error::InvalidSecret => "the provided secret is not a valid secret",
-            Error::ConfirmConnectionError => "Error trying to confirm connection",
+            Error::ConfirmConnectionError => "error trying to confirm connection",
         }
     }
 

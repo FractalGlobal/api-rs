@@ -2,11 +2,8 @@ use std::io::Read;
 
 use hyper::method::Method;
 use hyper::header::{Headers, Authorization};
-use hyper::status::StatusCode;
 use rustc_serialize::json;
-
-use dto::{FromDTO, ScopeDTO as Scope, LoginDTO, RegisterDTO, ResetPasswordDTO, ResponseDTO,
-          NewPasswordDTO};
+use dto::{FromDTO, ScopeDTO as Scope, LoginDTO, RegisterDTO, ResetPasswordDTO, NewPasswordDTO};
 
 use error::{Result, Error};
 use super::{Client, VoidDTO};
@@ -32,26 +29,13 @@ impl Client {
                 password: String::from(password.as_ref()),
                 email: String::from(email.as_ref()),
             };
-            let mut response = try!(self.send_request(Method::Post,
-                                                      format!("{}register", self.url),
-                                                      headers,
-                                                      Some(&dto)));
-
-            match response.status {
-                StatusCode::Ok => Ok(()),
-                StatusCode::Accepted => {
-                    let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    match json::decode::<ResponseDTO>(&response_str) {
-                        Ok(r) => Err(Error::ClientError(r)),
-                        Err(e) => Err(e.into()),
-                    }
-                }
-                StatusCode::Unauthorized => Err(Error::Unauthorized),
-                _ => Err(Error::ServerError),
-            }
+            let _ = try!(self.send_request(Method::Post,
+                                           format!("{}register", self.url),
+                                           headers,
+                                           Some(&dto)));
+            Ok(())
         } else {
-            Err(Error::Unauthorized)
+            Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
         }
     }
 
@@ -76,26 +60,11 @@ impl Client {
                                                       format!("{}login", self.url),
                                                       headers,
                                                       Some(&dto)));
-
-            match response.status {
-                StatusCode::Ok => {
-                    let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    Ok(try!(AccessToken::from_dto(try!(json::decode(&response_str)))))
-                }
-                StatusCode::Unauthorized => Err(Error::Unauthorized),
-                StatusCode::Accepted => {
-                    let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    match json::decode::<ResponseDTO>(&response_str) {
-                        Ok(r) => Err(Error::ClientError(r)),
-                        Err(e) => Err(e.into()),
-                    }
-                }
-                _ => Err(Error::ServerError),
-            }
+            let mut response_str = String::new();
+            let _ = try!(response.read_to_string(&mut response_str));
+            Ok(try!(AccessToken::from_dto(try!(json::decode(&response_str)))))
         } else {
-            Err(Error::Unauthorized)
+            Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
         }
     }
 
@@ -107,28 +76,15 @@ impl Client {
         if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let mut response = try!(self.send_request(Method::Post,
-                                                      format!("{}confirm_email/{}",
-                                                              self.url,
-                                                              email_key.as_ref()),
-                                                      headers,
-                                                      None::<&VoidDTO>));
-
-            match response.status {
-                StatusCode::Ok => Ok(()),
-                StatusCode::Accepted => {
-                    let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    match json::decode::<ResponseDTO>(&response_str) {
-                        Ok(r) => Err(Error::ClientError(r)),
-                        Err(e) => Err(e.into()),
-                    }
-
-                }
-                _ => Err(Error::ServerError),
-            }
+            let _ = try!(self.send_request(Method::Post,
+                                           format!("{}confirm_email/{}",
+                                                   self.url,
+                                                   email_key.as_ref()),
+                                           headers,
+                                           None::<&VoidDTO>));
+            Ok(())
         } else {
-            Err(Error::Unauthorized)
+            Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
         }
     }
 
@@ -145,26 +101,13 @@ impl Client {
                 username: String::from(username.as_ref()),
                 email: String::from(email.as_ref()),
             };
-            let mut response = try!(self.send_request(Method::Post,
-                                                      format!("{}start_reset_password", self.url),
-                                                      headers,
-                                                      Some(&dto)));
-
-            match response.status {
-                StatusCode::Ok => Ok(()),
-                StatusCode::Unauthorized => Err(Error::Unauthorized),
-                StatusCode::Accepted => {
-                    let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    match json::decode::<ResponseDTO>(&response_str) {
-                        Ok(r) => Err(Error::ClientError(r)),
-                        Err(e) => Err(e.into()),
-                    }
-                }
-                _ => Err(Error::ServerError),
-            }
+            let _ = try!(self.send_request(Method::Post,
+                                           format!("{}start_reset_password", self.url),
+                                           headers,
+                                           Some(&dto)));
+            Ok(())
         } else {
-            Err(Error::Unauthorized)
+            Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
         }
     }
 
@@ -178,28 +121,15 @@ impl Client {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let dto = NewPasswordDTO { new_password: String::from(new_password.as_ref()) };
-            let mut response = try!(self.send_request(Method::Post,
-                                                      format!("{}reset_password/{}",
-                                                              self.url,
-                                                              password_key.as_ref()),
-                                                      headers,
-                                                      Some(&dto)));
-
-            match response.status {
-                StatusCode::Ok => Ok(()),
-                StatusCode::Accepted => {
-                    let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    match json::decode::<ResponseDTO>(&response_str) {
-                        Ok(r) => Err(Error::ClientError(r)),
-                        Err(e) => Err(e.into()),
-                    }
-
-                }
-                _ => Err(Error::ServerError),
-            }
+            let _ = try!(self.send_request(Method::Post,
+                                           format!("{}reset_password/{}",
+                                                   self.url,
+                                                   password_key.as_ref()),
+                                           headers,
+                                           Some(&dto)));
+            Ok(())
         } else {
-            Err(Error::Unauthorized)
+            Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
         }
     }
 }

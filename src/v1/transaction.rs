@@ -2,11 +2,11 @@ use std::io::Read;
 
 use hyper::method::Method;
 use hyper::header::{Headers, Authorization};
-use hyper::status::StatusCode;
 use rustc_serialize::json;
 
 use utils::{WalletAddress, Amount};
-use dto::{FromDTO, ScopeDTO as Scope, ResponseDTO, GenerateTransactionDTO, TransactionDTO};
+use dto::{FromDTO, ScopeDTO as Scope, GenerateTransactionDTO, TransactionDTO,
+          PendingTransactionDTO};
 
 use super::{Client, VoidDTO};
 
@@ -32,28 +32,23 @@ impl Client {
                                        format!("{}transaction/{}", self.url, transaction_id),
                                        headers,
                                        None::<&VoidDTO>));
-            match response.status {
-                StatusCode::Ok => {
-                    let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    let transaction: TransactionDTO = try!(json::decode(&response_str));
-                    Ok(try!(Transaction::from_dto(transaction)))
-                }
-                StatusCode::Unauthorized => Err(Error::Unauthorized),
-                _ => Err(Error::ServerError),
-            }
+            let mut response_str = String::new();
+            let _ = try!(response.read_to_string(&mut response_str));
+            let transaction: TransactionDTO = try!(json::decode(&response_str));
+            Ok(try!(Transaction::from_dto(transaction)))
         } else {
-            Err(Error::Unauthorized)
+            Err(Error::Forbidden(String::from("the token must be an unexpired admin or user \
+                                               token")))
         }
     }
 
-    /// Generates a new transaction.
+    /// Generates a new transaction. Returns the code of the transaction
     pub fn new_transaction(&self,
                            access_token: &AccessToken,
                            receiver_wallet: WalletAddress,
                            receiver_id: u64,
                            amount: Amount)
-                           -> Result<()> {
+                           -> Result<String> {
         if access_token.scopes().any(|s| match s {
             &Scope::User(_) => true,
             _ => false,
@@ -73,27 +68,11 @@ impl Client {
                                                       format!("{}new_transaction", self.url),
                                                       headers,
                                                       Some(&dto)));
-
-            match response.status {
-                StatusCode::Ok => {
-                    // let mut response_str = String::new();
-                    // try!(response.read_to_string(&mut response_str));
-                    // TODO read message and return error or success
-                    Ok(())
-                }
-                StatusCode::Unauthorized => Err(Error::Unauthorized),
-                StatusCode::Accepted => {
-                    let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    match json::decode::<ResponseDTO>(&response_str) {
-                        Ok(r) => Err(Error::ClientError(r)),
-                        Err(e) => Err(e.into()),
-                    }
-                }
-                _ => Err(Error::ServerError),
-            }
+            let mut response_str = String::new();
+            let _ = try!(response.read_to_string(&mut response_str));
+            Ok(try!(json::decode::<PendingTransactionDTO>(&response_str)).code)
         } else {
-            Err(Error::Unauthorized)
+            Err(Error::Forbidden(String::from("the token must be an unexpired user  token")))
         }
     }
 
@@ -111,28 +90,14 @@ impl Client {
                                                               first_transaction),
                                                       headers,
                                                       None::<&VoidDTO>));
-            match response.status {
-                StatusCode::Ok => {
-                    let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    let transactions: Vec<TransactionDTO> = try!(json::decode(&response_str));
-                    Ok(transactions.into_iter()
-                        .map(|t| Transaction::from_dto(t).unwrap())
-                        .collect())
-                }
-                StatusCode::Unauthorized => Err(Error::Unauthorized),
-                StatusCode::Accepted => {
-                    let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    match json::decode::<ResponseDTO>(&response_str) {
-                        Ok(r) => Err(Error::ClientError(r)),
-                        Err(e) => Err(e.into()),
-                    }
-                }
-                _ => Err(Error::ServerError),
-            }
+            let mut response_str = String::new();
+            let _ = try!(response.read_to_string(&mut response_str));
+            let transactions: Vec<TransactionDTO> = try!(json::decode(&response_str));
+            Ok(transactions.into_iter()
+                .map(|t| Transaction::from_dto(t).unwrap())
+                .collect())
         } else {
-            Err(Error::Unauthorized)
+            Err(Error::Forbidden(String::from("the token must be an unexpired admin token")))
         }
     }
 }
