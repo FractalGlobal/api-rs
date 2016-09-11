@@ -22,5 +22,5 @@ fractal-utils = "^0.2"
 fractal-dto = "^0.3"
 
 [features]
-default = ["json-types"]
+default = []
 json-types = ["fractal-utils/json-types"]
