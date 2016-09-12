@@ -5,8 +5,7 @@ use hyper::header::{Headers, Authorization};
 use rustc_serialize::json;
 
 use utils::{WalletAddress, Amount};
-use dto::{FromDTO, ScopeDTO as Scope, GenerateTransactionDTO, TransactionDTO,
-          PendingTransactionDTO};
+use dto::{FromDTO, GenerateTransactionDTO, TransactionDTO, PendingTransactionDTO};
 
 use super::{Client, VoidDTO};
 
@@ -21,10 +20,8 @@ impl Client {
                            access_token: &AccessToken,
                            transaction_id: u64)
                            -> Result<Transaction> {
-        if access_token.scopes().any(|s| match s {
-            &Scope::User(_) | &Scope::Admin => true,
-            _ => false,
-        }) && !access_token.has_expired() {
+        if (access_token.get_user_id().is_some() || access_token.is_admin()) &&
+           !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let mut response =
@@ -49,17 +46,12 @@ impl Client {
                            receiver_id: u64,
                            amount: Amount)
                            -> Result<String> {
-        if access_token.scopes().any(|s| match s {
-            &Scope::User(_) => true,
-            _ => false,
-        }) && !access_token.has_expired() {
+        let user_id = access_token.get_user_id();
+        if user_id.is_some() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let dto = GenerateTransactionDTO {
-                origin_id: access_token.scopes().fold(0, |acc, s| match s {
-                    &Scope::User(id) => id,
-                    _ => acc,
-                }),
+                origin_id: user_id.unwrap(),
                 destination_address: receiver_wallet,
                 destination_id: receiver_id,
                 amount: amount,
@@ -81,7 +73,7 @@ impl Client {
                                 access_token: &AccessToken,
                                 first_transaction: u64)
                                 -> Result<Vec<Transaction>> {
-        if access_token.scopes().any(|s| s == &Scope::Admin) && !access_token.has_expired() {
+        if access_token.is_admin() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let mut response = try!(self.send_request(Method::Get,
