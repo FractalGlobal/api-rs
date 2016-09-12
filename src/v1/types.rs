@@ -526,7 +526,7 @@ impl FromDTO<UserDTO> for User {
         Ok(User {
             user_id: dto.user_id,
             username: dto.username,
-            display_name: dto.displayname,
+            display_name: dto.display_name,
             email: (dto.email, dto.email_confirmed),
             first_name: first_opt,
             last_name: last_opt,
