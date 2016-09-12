@@ -56,6 +56,32 @@ impl AccessToken {
         self.scopes.iter()
     }
 
+    /// Returns wether the token is an admin token.
+    pub fn is_admin(&self) -> bool {
+        self.scopes.iter().any(|s| s == &Scope::Admin)
+    }
+
+    /// Returns wether the token is an admin token.
+    pub fn is_public(&self) -> bool {
+        self.scopes.iter().any(|s| s == &Scope::Public)
+    }
+
+    /// Returns wether the token is an admin token.
+    pub fn is_user(&self, user_id: u64) -> bool {
+        self.scopes.iter().any(|s| s == &Scope::User(user_id))
+    }
+
+    /// Gets the user ID if the token is a user token.
+    pub fn get_user_id(&self) -> Option<u64> {
+        for scope in &self.scopes {
+            match scope {
+                &Scope::User(id) => return Some(id),
+                _ => {}
+            }
+        }
+        None
+    }
+
     /// Gets the token to be sent
     pub fn get_token(&self) -> Bearer {
         Bearer { token: self.access_token.clone() }

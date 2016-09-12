@@ -4,8 +4,8 @@ use hyper::method::Method;
 use hyper::header::{Headers, Authorization};
 use rustc_serialize::json;
 
-use dto::{FromDTO, ScopeDTO as Scope, PendingFriendRequestDTO, FriendRequestDTO,
-          ConfirmFriendRequestDTO, RelationshipDTO as Relationship};
+use dto::{FromDTO, PendingFriendRequestDTO, FriendRequestDTO, ConfirmFriendRequestDTO,
+          RelationshipDTO as Relationship};
 
 use error::{Result, Error};
 use super::{Client, VoidDTO};
@@ -22,17 +22,12 @@ impl Client {
                                               relation: Relationship,
                                               message: Option<S>)
                                               -> Result<()> {
-        if access_token.scopes().any(|s| match s {
-            &Scope::User(_) => true,
-            _ => false,
-        }) && !access_token.has_expired() {
+        let user_id = access_token.get_user_id();
+        if user_id.is_some() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let dto = FriendRequestDTO {
-                origin_id: access_token.scopes().fold(0, |acc, s| match s {
-                    &Scope::User(id) => id,
-                    _ => acc,
-                }),
+                origin_id: user_id.unwrap(),
                 destination_id: user,
                 relationship: relation,
                 message: match message {
@@ -56,19 +51,14 @@ impl Client {
                                   request_id: u64,
                                   user: u64)
                                   -> Result<()> {
-        if access_token.scopes().any(|s| match s {
-            &Scope::User(_) => true,
-            _ => false,
-        }) && !access_token.has_expired() {
+        let user_id = access_token.get_user_id();
+        if user_id.is_some() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let dto = ConfirmFriendRequestDTO {
                 request_id: request_id,
                 origin: user,
-                destination: access_token.scopes().fold(0, |acc, s| match s {
-                    &Scope::User(id) => id,
-                    _ => acc,
-                }),
+                destination: user_id.unwrap(),
             };
             let _ = try!(self.send_request(Method::Post,
                                            format!("{}confirm_friend_request",
@@ -87,11 +77,8 @@ impl Client {
                                access_token: &AccessToken,
                                user_id: u64)
                                -> Result<Vec<PendingFriendRequest>> {
-        if access_token.scopes().any(|s| match s {
-            &Scope::User(u_id) => u_id == user_id,
-            &Scope::Admin => true,
-            _ => false,
-        }) && !access_token.has_expired() {
+        if (access_token.is_admin() || access_token.is_user(user_id)) &&
+           !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let mut response =

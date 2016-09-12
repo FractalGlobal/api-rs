@@ -3,7 +3,7 @@ use std::io::Read;
 use hyper::method::Method;
 use hyper::header::{Headers, Authorization};
 use rustc_serialize::json;
-use dto::{FromDTO, ScopeDTO as Scope, LoginDTO, RegisterDTO, ResetPasswordDTO, NewPasswordDTO};
+use dto::{FromDTO, LoginDTO, RegisterDTO, ResetPasswordDTO, NewPasswordDTO};
 
 use error::{Result, Error};
 use super::{Client, VoidDTO};
@@ -21,7 +21,7 @@ impl Client {
                                    password: S,
                                    email: S)
                                    -> Result<()> {
-        if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
+        if access_token.is_public() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let dto = RegisterDTO {
@@ -48,7 +48,7 @@ impl Client {
                                 password: S,
                                 remember_me: bool)
                                 -> Result<AccessToken> {
-        if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
+        if access_token.is_public() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let dto = LoginDTO {
@@ -73,7 +73,7 @@ impl Client {
                                         access_token: &AccessToken,
                                         email_key: S)
                                         -> Result<()> {
-        if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
+        if access_token.is_public() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let _ = try!(self.send_request(Method::Post,
@@ -94,7 +94,7 @@ impl Client {
                                                username: S,
                                                email: S)
                                                -> Result<()> {
-        if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
+        if access_token.is_public() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let dto = ResetPasswordDTO {
@@ -117,7 +117,7 @@ impl Client {
                                          password_key: S,
                                          new_password: S)
                                          -> Result<()> {
-        if access_token.scopes().any(|s| s == &Scope::Public) && !access_token.has_expired() {
+        if access_token.is_public() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let dto = NewPasswordDTO { new_password: String::from(new_password.as_ref()) };
