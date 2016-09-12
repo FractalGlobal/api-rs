@@ -655,6 +655,17 @@ impl PendingFriendRequest {
     }
 }
 
+#[cfg(feature = "json-types")]
+impl json::ToJson for PendingFriendRequest {
+    fn to_json(&self) -> json::Json {
+        let mut object = json::Object::new();
+        let _ = object.insert(String::from("connection_id"), self.connection_id.to_json());
+        let _ = object.insert(String::from("origin_user"), self.origin_user.to_json());
+        let _ = object.insert(String::from("message"), self.message.to_json());
+        json::Json::Object(object)
+    }
+}
+
 impl FromDTO<PendingFriendRequestDTO> for PendingFriendRequest {
     fn from_dto(dto: PendingFriendRequestDTO) -> StdResult<PendingFriendRequest, FromDTOError> {
         Ok(PendingFriendRequest {
