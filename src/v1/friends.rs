@@ -4,12 +4,12 @@ use hyper::method::Method;
 use hyper::header::{Headers, Authorization};
 use rustc_serialize::json;
 
-use dto::{FromDTO, PendingFriendRequestDTO, FriendRequestDTO, ConfirmFriendRequestDTO,
+use dto::{FromDTO, PendingFriendRequestDTO, FriendRequestDTO, ConfirmFriendRequestDTO, ProfileDTO,
           RelationshipDTO as Relationship};
 
 use error::{Result, Error};
 use super::{Client, VoidDTO};
-use super::types::PendingFriendRequest;
+use super::types::{PendingFriendRequest, Profile};
 use super::oauth::AccessToken;
 
 
@@ -91,6 +91,29 @@ impl Client {
             let connections: Vec<PendingFriendRequestDTO> = try!(json::decode(&response_str));
             Ok(connections.into_iter()
                 .map(|t| PendingFriendRequest::from_dto(t).unwrap())
+                .collect())
+        } else {
+            Err(Error::Forbidden(String::from("the token must be an unexpired user or admin \
+                                               token, and in the case of an user token, the ID \
+                                               in the token must be the same as the given ID")))
+        }
+    }
+
+    /// Returns the given users friends
+    pub fn get_friends(&self, access_token: &AccessToken, user_id: u64) -> Result<Vec<Profile>> {
+        if (access_token.is_admin() || access_token.is_user(user_id)) &&
+           !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let mut response = try!(self.send_request(Method::Get,
+                                                      format!("{}friends/{}", self.url, user_id),
+                                                      headers,
+                                                      None::<&VoidDTO>));
+            let mut response_str = String::new();
+            let _ = try!(response.read_to_string(&mut response_str));
+            let friends: Vec<ProfileDTO> = try!(json::decode(&response_str));
+            Ok(friends.into_iter()
+                .map(|f| Profile::from_dto(f).unwrap())
                 .collect())
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired user or admin \
