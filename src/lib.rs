@@ -2,6 +2,13 @@
        html_favicon_url = "http://test.fractal.global/img/favicon32.png",
        html_root_url = "http://fractal.global/api-rs/")]
 //! Fractal Global Credits API.
+//!
+//!
+//! Using it is as simple as including this in the crate:
+//!
+//! ```
+//! extern crate fractal_api;
+//! ```
 
 #![forbid(missing_docs, warnings)]
 #![deny(deprecated, improper_ctypes, non_shorthand_field_patterns, overflowing_literals,

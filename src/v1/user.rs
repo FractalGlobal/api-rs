@@ -5,14 +5,13 @@ use hyper::header::{Headers, Authorization};
 use rustc_serialize::json;
 
 use chrono::NaiveDate;
-
 use utils::Address;
-use dto::{FromDTO, UserDTO, AuthenticationCodeDTO, ResponseDTO, UpdateUserDTO};
+use dto::{FromDTO, UserDTO, ProfileDTO, AuthenticationCodeDTO, ResponseDTO, UpdateUserDTO,
+          SearchUserDTO};
 
 use super::{Client, VoidDTO};
-
 use error::{Result, Error};
-use super::types::User;
+use super::types::{User, Profile};
 use super::oauth::AccessToken;
 
 /// User methods for the client.
@@ -416,9 +415,49 @@ impl Client {
                                        Some(&dto)));
             Ok(())
         } else {
-            Err(Error::Forbidden(String::from("the token must be an unexpired admin or user \
-                                               token, and in the case of a user token, the ID \
-                                               in the token must match the given ID")))
+            Err(Error::Forbidden(String::from("the token must be an unexpired user token")))
+        }
+    }
+
+    /// Searches users doing a random search with the given string. It will try to find the string
+    /// in names, emails etc.
+    pub fn search_user_random<S: AsRef<str>>(&self,
+                                             access_token: &AccessToken,
+                                             random: S)
+                                             -> Result<Vec<Profile>> {
+        if (access_token.is_public() || access_token.get_user_id().is_some()) &&
+           !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let dto = SearchUserDTO {
+                random: Some(String::from(random.as_ref())),
+                username: None,
+                email: None,
+                first_name: None,
+                last_name: None,
+                age: None,
+                country: None,
+                state: None,
+                city: None,
+                phone: None,
+                all: false,
+            };
+            let mut response = try!(self.send_request(Method::Post,
+                                                      format!("{}search_user", self.url),
+                                                      headers,
+                                                      Some(&dto)));
+            let mut response_str = String::new();
+            let _ = try!(response.read_to_string(&mut response_str));
+            let dto_users: Vec<ProfileDTO> = try!(json::decode(&response_str));
+            Ok(dto_users.into_iter()
+                .filter_map(|u| match Profile::from_dto(u) {
+                    Ok(u) => Some(u),
+                    Err(_) => None,
+                })
+                .collect())
+        } else {
+            Err(Error::Forbidden(String::from("the token must be an unexpired public or user \
+                                               token")))
         }
     }
 }
