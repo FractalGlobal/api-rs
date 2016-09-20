@@ -5,7 +5,8 @@ use hyper::header::{Headers, Authorization};
 use rustc_serialize::json;
 
 use utils::{WalletAddress, Amount};
-use dto::{FromDTO, GenerateTransactionDTO, TransactionDTO, PendingTransactionDTO, ResponseDTO};
+use dto::{FromDTO, GenerateTransactionDTO, TransactionDTO, PendingTransactionDTO,
+          AuthenticationCodeDTO, ResponseDTO};
 
 use super::{Client, VoidDTO};
 
@@ -92,6 +93,31 @@ impl Client {
             Err(Error::Forbidden(String::from("the token must be an unexpired admin token")))
         }
     }
+
+    /// Authenticates the pending transaction
+    pub fn authenticate_transaction<S: AsRef<str>>(&self,
+                                                   access_token: &AccessToken,
+                                                   transaction_key: S,
+                                                   code: u32)
+                                                   -> Result<()> {
+        let user_id = access_token.get_user_id();
+        if user_id.is_some() && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let dto = AuthenticationCodeDTO { code: code };
+            let _ = try!(self.send_request(Method::Post,
+                                           format!("{}authenticate_transaction/{}",
+                                                   self.url,
+                                                   transaction_key.as_ref()),
+                                           headers,
+                                           Some(&dto)));
+
+            Ok(())
+        } else {
+            Err(Error::Forbidden(String::from("the token must be an unexpired user token")))
+        }
+    }
+
 
     /// Checks if the given wallet address is a valid wallet address and returns its associated
     /// user id
