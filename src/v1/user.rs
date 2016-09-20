@@ -421,12 +421,21 @@ impl Client {
 
     /// Searches users doing a random search with the given string. It will try to find the string
     /// in names, emails etc.
+    ///
+    /// It will panic if the `include_me` or `include_friends` variables are set and the token is
+    /// not an user scoped token.
     pub fn search_user_random<S: AsRef<str>>(&self,
                                              access_token: &AccessToken,
-                                             random: S)
+                                             random: S,
+                                             include_me: bool,
+                                             include_friends: bool)
                                              -> Result<Vec<Profile>> {
-        if (access_token.is_public() || access_token.get_user_id().is_some()) &&
-           !access_token.has_expired() {
+        let user_id = access_token.get_user_id();
+        if (access_token.is_public() || user_id.is_some()) && !access_token.has_expired() {
+            if (include_me || include_friends) && user_id.is_none() {
+                panic!("to include the current user or friends the token must be a user scoped \
+                        token");
+            }
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let dto = SearchUserDTO {
@@ -441,6 +450,8 @@ impl Client {
                 city: None,
                 phone: None,
                 all: false,
+                include_me: include_me,
+                include_friends: include_friends,
             };
             let mut response = try!(self.send_request(Method::Post,
                                                       format!("{}search_user", self.url),
