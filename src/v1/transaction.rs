@@ -1,11 +1,11 @@
 use std::io::Read;
-
+use std::str::FromStr;
 use hyper::method::Method;
 use hyper::header::{Headers, Authorization};
 use rustc_serialize::json;
 
 use utils::{WalletAddress, Amount};
-use dto::{FromDTO, GenerateTransactionDTO, TransactionDTO, PendingTransactionDTO};
+use dto::{FromDTO, GenerateTransactionDTO, TransactionDTO, PendingTransactionDTO, ResponseDTO};
 
 use super::{Client, VoidDTO};
 
@@ -90,6 +90,39 @@ impl Client {
                 .collect())
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired admin token")))
+        }
+    }
+
+    /// Checks if the given wallet address is a valid wallet address and returns its associated
+    /// user id
+    pub fn get_user_id_from_wallet_address<S: AsRef<str>>(&self,
+                                                          access_token: &AccessToken,
+                                                          wallet_address: S)
+                                                          -> Result<u64> {
+        let user_id = access_token.get_user_id();
+        if user_id.is_some() && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let mut response = try!(self.send_request(Method::Post,
+                                                      format!("{}check_wallet_address/{}",
+                                                              self.url,
+                                                              wallet_address.as_ref()),
+                                                      headers,
+                                                      None::<&VoidDTO>));
+
+            let mut response_str = String::new();
+            let _ = try!(response.read_to_string(&mut response_str));
+            let res: ResponseDTO = try!(json::decode(&response_str));
+            // unimplemented!()
+            match u64::from_str(&res.message) {
+                Ok(d) => Ok(d),
+                Err(e) => {
+                    println!("{:?}", e);
+                    Err(Error::BadRequest(String::from("could not parse result to correct type")))
+                }
+            }
+        } else {
+            Err(Error::Forbidden(String::from("the token must be an unexpired user token")))
         }
     }
 }
