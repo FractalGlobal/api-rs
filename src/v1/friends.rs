@@ -121,4 +121,42 @@ impl Client {
                                                in the token must be the same as the given ID")))
         }
     }
+
+    /// Rejects the friend request for the given user
+    pub fn reject_friend_request(&self, access_token: &AccessToken, request_id: u64) -> Result<()> {
+
+        if access_token.get_user_id().is_some() && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let _ = try!(self.send_request(Method::Post,
+                                           format!("{}reject_friend_request/{}",
+                                                   self.url,
+                                                   request_id),
+                                           headers,
+                                           None::<&VoidDTO>));
+            Ok(())
+        } else {
+            Err(Error::Forbidden(String::from("the token must be an unexpired user or admin \
+                                               token, and in the case of an user token, the ID \
+                                               in the token must be the same as the given ID")))
+        }
+    }
+
+    /// Unfriends the given user
+    pub fn unfriend(&self, access_token: &AccessToken, request_id: u64) -> Result<()> {
+
+        if access_token.get_user_id().is_some() && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let _ = try!(self.send_request(Method::Delete,
+                                           format!("{}friend/{}", self.url, request_id),
+                                           headers,
+                                           None::<&VoidDTO>));
+            Ok(())
+        } else {
+            Err(Error::Forbidden(String::from("the token must be an unexpired user or admin \
+                                               token, and in the case of an user token, the ID \
+                                               in the token must be the same as the given ID")))
+        }
+    }
 }
