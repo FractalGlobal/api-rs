@@ -631,6 +631,8 @@ pub struct PendingFriendRequest {
     connection_id: u64,
     /// Origin user's profile.
     origin_user: Profile,
+    /// Destination user's profile.
+    destination_user: Profile,
     /// Request message.
     message: Option<String>,
 }
@@ -644,6 +646,11 @@ impl PendingFriendRequest {
     /// Gets the origin user's profile of the friend request.
     pub fn get_origin_user(&self) -> &Profile {
         &self.origin_user
+    }
+
+    /// Gets the destination user's profile of the friend request.
+    pub fn get_destination_user(&self) -> &Profile {
+        &self.destination_user
     }
 
     /// Gets the message of the friend request.
@@ -661,6 +668,8 @@ impl json::ToJson for PendingFriendRequest {
         let mut object = json::Object::new();
         let _ = object.insert(String::from("connection_id"), self.connection_id.to_json());
         let _ = object.insert(String::from("origin_user"), self.origin_user.to_json());
+        let _ = object.insert(String::from("destination_user"),
+                              self.destination_user.to_json());
         let _ = object.insert(String::from("message"), self.message.to_json());
         json::Json::Object(object)
     }
@@ -671,6 +680,7 @@ impl FromDTO<PendingFriendRequestDTO> for PendingFriendRequest {
         Ok(PendingFriendRequest {
             connection_id: dto.connection_id,
             origin_user: try!(Profile::from_dto(dto.origin_user)),
+            destination_user: try!(Profile::from_dto(dto.destination_user)),
             message: dto.message,
         })
     }
