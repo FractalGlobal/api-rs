@@ -216,11 +216,11 @@ impl Client {
     }
 
     /// Sets the users birthday
-    pub fn set_birthday<S: AsRef<str>>(&self,
-                                       access_token: &AccessToken,
-                                       user_id: u64,
-                                       birthday: NaiveDate)
-                                       -> Result<()> {
+    pub fn set_birthday(&self,
+                        access_token: &AccessToken,
+                        user_id: u64,
+                        birthday: NaiveDate)
+                        -> Result<()> {
         if (access_token.is_user(user_id) || access_token.is_admin()) &&
            !access_token.has_expired() {
             let mut headers = Headers::new();
