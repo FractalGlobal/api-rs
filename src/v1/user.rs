@@ -353,11 +353,11 @@ impl Client {
     }
 
     /// Sets the users address
-    pub fn set_address<S: AsRef<str>>(&self,
-                                      access_token: &AccessToken,
-                                      user_id: u64,
-                                      address: Address)
-                                      -> Result<()> {
+    pub fn set_address(&self,
+                       access_token: &AccessToken,
+                       user_id: u64,
+                       address: Address)
+                       -> Result<()> {
         if (access_token.is_user(user_id) || access_token.is_admin()) &&
            !access_token.has_expired() {
             let mut headers = Headers::new();
