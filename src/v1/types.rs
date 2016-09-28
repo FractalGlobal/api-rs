@@ -417,12 +417,12 @@ impl json::ToJson for User {
         }
         match self.last_name {
             Some((ref l, c)) => {
-                let _ = object.insert(String::from("first_name"), l.to_json());
-                let _ = object.insert(String::from("first_name_confirmed"), c.to_json());
+                let _ = object.insert(String::from("last_name"), l.to_json());
+                let _ = object.insert(String::from("last_name_confirmed"), c.to_json());
             }
             None => {
-                let _ = object.insert(String::from("first_name"), None::<String>.to_json());
-                let _ = object.insert(String::from("first_name_confirmed"), false.to_json());
+                let _ = object.insert(String::from("last_name"), None::<String>.to_json());
+                let _ = object.insert(String::from("last_name_confirmed"), false.to_json());
             }
         }
         let _ = object.insert(String::from("device_count"), self.device_count.to_json());
