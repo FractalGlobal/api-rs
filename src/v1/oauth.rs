@@ -130,13 +130,13 @@ impl Client {
                         username: String::from(app_id.as_ref()),
                         password: Some(String::from(secret.as_ref())),
                     }));
-                    let mut response = try!(self.send_request(Method::Get,
-                                                              format!("{}token", self.url),
-                                                              headers,
-                                                              None::<&VoidDTO>));
+                    let mut response = self.send_request(Method::Get,
+                                      format!("{}token", self.url),
+                                      headers,
+                                      None::<&VoidDTO>)?;
                     let mut response_str = String::new();
-                    let _ = try!(response.read_to_string(&mut response_str));
-                    Ok(try!(AccessToken::from_dto(try!(json::decode(&response_str)))))
+                    let _ = response.read_to_string(&mut response_str)?;
+                    Ok(AccessToken::from_dto(json::decode(&response_str)?)?)
                 } else {
                     Err(Error::InvalidSecret)
                 }
@@ -153,7 +153,7 @@ impl Client {
                                         access_token: &AccessToken,
                                         name: S,
                                         scopes: &[Scope],
-                                        request_limit: usize)
+                                        request_limit: Option<usize>)
                                         -> Result<ClientInfo> {
         if access_token.scopes().any(|s| s == &Scope::Admin) && !access_token.has_expired() {
             let mut headers = Headers::new();
@@ -165,14 +165,14 @@ impl Client {
                 scopes: scopes_vec,
                 request_limit: request_limit,
             };
-            let mut response = try!(self.send_request(Method::Post,
-                                                      format!("{}create_client", self.url),
-                                                      headers,
-                                                      Some(&dto)));
+            let mut response = self.send_request(Method::Post,
+                              format!("{}create_client", self.url),
+                              headers,
+                              Some(&dto))?;
             let mut response_str = String::new();
-            let _ = try!(response.read_to_string(&mut response_str));
-            let client_dto: ClientInfoDTO = try!(json::decode(&response_str));
-            Ok(try!(ClientInfo::from_dto(client_dto)))
+            let _ = response.read_to_string(&mut response_str)?;
+            let client_dto: ClientInfoDTO = json::decode(&response_str)?;
+            Ok(ClientInfo::from_dto(client_dto)?)
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired admin token")))
         }

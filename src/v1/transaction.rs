@@ -25,15 +25,14 @@ impl Client {
            !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let mut response =
-                try!(self.send_request(Method::Get,
-                                       format!("{}transaction/{}", self.url, transaction_id),
-                                       headers,
-                                       None::<&VoidDTO>));
+            let mut response = self.send_request(Method::Get,
+                              format!("{}transaction/{}", self.url, transaction_id),
+                              headers,
+                              None::<&VoidDTO>)?;
             let mut response_str = String::new();
-            let _ = try!(response.read_to_string(&mut response_str));
-            let transaction: TransactionDTO = try!(json::decode(&response_str));
-            Ok(try!(Transaction::from_dto(transaction)))
+            let _ = response.read_to_string(&mut response_str)?;
+            let transaction: TransactionDTO = json::decode(&response_str)?;
+            Ok(Transaction::from_dto(transaction)?)
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired admin or user \
                                                token")))
@@ -57,13 +56,13 @@ impl Client {
                 destination_id: receiver_id,
                 amount: amount,
             };
-            let mut response = try!(self.send_request(Method::Post,
-                                                      format!("{}new_transaction", self.url),
-                                                      headers,
-                                                      Some(&dto)));
+            let mut response = self.send_request(Method::Post,
+                              format!("{}new_transaction", self.url),
+                              headers,
+                              Some(&dto))?;
             let mut response_str = String::new();
-            let _ = try!(response.read_to_string(&mut response_str));
-            Ok(try!(json::decode::<PendingTransactionDTO>(&response_str)).code)
+            let _ = response.read_to_string(&mut response_str)?;
+            Ok(json::decode::<PendingTransactionDTO>(&response_str)?.code)
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired user  token")))
         }
@@ -77,15 +76,13 @@ impl Client {
         if access_token.is_admin() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let mut response = try!(self.send_request(Method::Get,
-                                                      format!("{}all_transactions/{}",
-                                                              self.url,
-                                                              first_transaction),
-                                                      headers,
-                                                      None::<&VoidDTO>));
+            let mut response = self.send_request(Method::Get,
+                              format!("{}all_transactions/{}", self.url, first_transaction),
+                              headers,
+                              None::<&VoidDTO>)?;
             let mut response_str = String::new();
-            let _ = try!(response.read_to_string(&mut response_str));
-            let transactions: Vec<TransactionDTO> = try!(json::decode(&response_str));
+            let _ = response.read_to_string(&mut response_str)?;
+            let transactions: Vec<TransactionDTO> = json::decode(&response_str)?;
             Ok(transactions.into_iter()
                 .map(|t| Transaction::from_dto(t).unwrap())
                 .collect())
@@ -105,12 +102,12 @@ impl Client {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let dto = AuthenticationCodeDTO { code: code };
-            let _ = try!(self.send_request(Method::Post,
-                                           format!("{}authenticate_transaction/{}",
-                                                   self.url,
-                                                   transaction_key.as_ref()),
-                                           headers,
-                                           Some(&dto)));
+            let _ = self.send_request(Method::Post,
+                              format!("{}authenticate_transaction/{}",
+                                      self.url,
+                                      transaction_key.as_ref()),
+                              headers,
+                              Some(&dto))?;
 
             Ok(())
         } else {
@@ -129,16 +126,16 @@ impl Client {
         if user_id.is_some() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let mut response = try!(self.send_request(Method::Post,
-                                                      format!("{}check_wallet_address/{}",
-                                                              self.url,
-                                                              wallet_address.as_ref()),
-                                                      headers,
-                                                      None::<&VoidDTO>));
+            let mut response = self.send_request(Method::Post,
+                              format!("{}check_wallet_address/{}",
+                                      self.url,
+                                      wallet_address.as_ref()),
+                              headers,
+                              None::<&VoidDTO>)?;
 
             let mut response_str = String::new();
-            let _ = try!(response.read_to_string(&mut response_str));
-            let res: ResponseDTO = try!(json::decode(&response_str));
+            let _ = response.read_to_string(&mut response_str)?;
+            let res: ResponseDTO = json::decode(&response_str)?;
             // unimplemented!()
             match u64::from_str(&res.message) {
                 Ok(d) => Ok(d),

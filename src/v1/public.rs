@@ -29,10 +29,10 @@ impl Client {
                 password: String::from(password.as_ref()),
                 email: String::from(email.as_ref()),
             };
-            let _ = try!(self.send_request(Method::Post,
-                                           format!("{}register", self.url),
-                                           headers,
-                                           Some(&dto)));
+            let _ = self.send_request(Method::Post,
+                              format!("{}register", self.url),
+                              headers,
+                              Some(&dto))?;
             Ok(())
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
@@ -56,13 +56,13 @@ impl Client {
                 password: String::from(password.as_ref()),
                 remember_me: remember_me,
             };
-            let mut response = try!(self.send_request(Method::Post,
-                                                      format!("{}login", self.url),
-                                                      headers,
-                                                      Some(&dto)));
+            let mut response = self.send_request(Method::Post,
+                              format!("{}login", self.url),
+                              headers,
+                              Some(&dto))?;
             let mut response_str = String::new();
-            let _ = try!(response.read_to_string(&mut response_str));
-            Ok(try!(AccessToken::from_dto(try!(json::decode(&response_str)))))
+            let _ = response.read_to_string(&mut response_str)?;
+            Ok(AccessToken::from_dto(json::decode(&response_str)?)?)
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
         }
@@ -76,12 +76,10 @@ impl Client {
         if access_token.is_public() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let _ = try!(self.send_request(Method::Post,
-                                           format!("{}confirm_email/{}",
-                                                   self.url,
-                                                   email_key.as_ref()),
-                                           headers,
-                                           None::<&VoidDTO>));
+            let _ = self.send_request(Method::Post,
+                              format!("{}confirm_email/{}", self.url, email_key.as_ref()),
+                              headers,
+                              None::<&VoidDTO>)?;
             Ok(())
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
@@ -101,10 +99,10 @@ impl Client {
                 username: String::from(username.as_ref()),
                 email: String::from(email.as_ref()),
             };
-            let _ = try!(self.send_request(Method::Post,
-                                           format!("{}start_reset_password", self.url),
-                                           headers,
-                                           Some(&dto)));
+            let _ = self.send_request(Method::Post,
+                              format!("{}start_reset_password", self.url),
+                              headers,
+                              Some(&dto))?;
             Ok(())
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
@@ -121,12 +119,10 @@ impl Client {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let dto = NewPasswordDTO { new_password: String::from(new_password.as_ref()) };
-            let _ = try!(self.send_request(Method::Post,
-                                           format!("{}reset_password/{}",
-                                                   self.url,
-                                                   password_key.as_ref()),
-                                           headers,
-                                           Some(&dto)));
+            let _ = self.send_request(Method::Post,
+                              format!("{}reset_password/{}", self.url, password_key.as_ref()),
+                              headers,
+                              Some(&dto))?;
             Ok(())
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired public token")))

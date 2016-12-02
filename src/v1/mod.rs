@@ -61,7 +61,7 @@ impl Client {
             response = response.body(b);
         }
         let response = response.send();
-        let mut response = try!(if response.is_err() {
+        let mut response = if response.is_err() {
             let mut response = self.client
                 .request(method, url.as_ref())
                 .headers(headers.clone());
@@ -71,33 +71,33 @@ impl Client {
             response.send()
         } else {
             response
-        });
+        }?;
 
         match response.status {
             StatusCode::Ok => Ok(response),
             status => {
                 let mut response_str = String::new();
-                let _ = try!(response.read_to_string(&mut response_str));
+                let _ = response.read_to_string(&mut response_str)?;
 
                 match status {
                     StatusCode::Forbidden => {
-                        let response_dto: ResponseDTO = try!(json::decode(&response_str));
+                        let response_dto: ResponseDTO = json::decode(&response_str)?;
                         Err(Error::Forbidden(response_dto.message))
                     }
                     StatusCode::Accepted => {
-                        let response_dto: ResponseDTO = try!(json::decode(&response_str));
+                        let response_dto: ResponseDTO = json::decode(&response_str)?;
                         Err(Error::ClientError(response_dto.message))
                     }
                     StatusCode::BadRequest => {
-                        let response_dto: ResponseDTO = try!(json::decode(&response_str));
+                        let response_dto: ResponseDTO = json::decode(&response_str)?;
                         Err(Error::BadRequest(response_dto.message))
                     }
                     StatusCode::NotFound => {
-                        let response_dto: ResponseDTO = try!(json::decode(&response_str));
+                        let response_dto: ResponseDTO = json::decode(&response_str)?;
                         Err(Error::NotFound(response_dto.message))
                     }
                     _ => {
-                        let response_dto: ResponseDTO = try!(json::decode(&response_str));
+                        let response_dto: ResponseDTO = json::decode(&response_str)?;
                         Err(Error::ServerError(response_dto.message))
                     }
                 }
