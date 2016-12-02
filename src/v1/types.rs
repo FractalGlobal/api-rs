@@ -20,7 +20,7 @@ pub struct ClientInfo {
     id: String,
     secret: String,
     scopes: Vec<Scope>,
-    request_limit: usize,
+    request_limit: Option<usize>,
 }
 
 impl ClientInfo {
@@ -40,7 +40,7 @@ impl ClientInfo {
     }
 
     /// Gets the request limit for the client.
-    pub fn get_request_limit(&self) -> usize {
+    pub fn get_request_limit(&self) -> Option<usize> {
         self.request_limit
     }
 }
@@ -615,8 +615,8 @@ impl FromDTO<TransactionDTO> for Transaction {
     fn from_dto(dto: TransactionDTO) -> StdResult<Transaction, FromDTOError> {
         Ok(Transaction {
             transaction_id: dto.transaction_id,
-            origin_user: try!(Profile::from_dto(dto.origin_user)),
-            destination_user: try!(Profile::from_dto(dto.destination_user)),
+            origin_user: Profile::from_dto(dto.origin_user)?,
+            destination_user: Profile::from_dto(dto.destination_user)?,
             destination_address: dto.destination_address,
             amount: dto.amount,
             timestamp: dto.timestamp,
@@ -679,8 +679,8 @@ impl FromDTO<PendingFriendRequestDTO> for PendingFriendRequest {
     fn from_dto(dto: PendingFriendRequestDTO) -> StdResult<PendingFriendRequest, FromDTOError> {
         Ok(PendingFriendRequest {
             connection_id: dto.connection_id,
-            origin_user: try!(Profile::from_dto(dto.origin_user)),
-            destination_user: try!(Profile::from_dto(dto.destination_user)),
+            origin_user: Profile::from_dto(dto.origin_user)?,
+            destination_user: Profile::from_dto(dto.destination_user)?,
             message: dto.message,
         })
     }

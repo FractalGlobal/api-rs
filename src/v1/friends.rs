@@ -35,10 +35,10 @@ impl Client {
                     None => None,
                 },
             };
-            let _ = try!(self.send_request(Method::Post,
-                                           format!("{}create_friend_request", self.url),
-                                           headers,
-                                           Some(&dto)));
+            let _ = self.send_request(Method::Post,
+                              format!("{}create_friend_request", self.url),
+                              headers,
+                              Some(&dto))?;
             Ok(())
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired user token")))
@@ -60,12 +60,12 @@ impl Client {
                 origin: user,
                 destination: user_id.unwrap(),
             };
-            let _ = try!(self.send_request(Method::Post,
-                                           format!("{}confirm_friend_request",
+            let _ = self.send_request(Method::Post,
+                              format!("{}confirm_friend_request",
                                    self.url,
                                   ),
-                                           headers,
-                                           Some(&dto)));
+                              headers,
+                              Some(&dto))?;
             Ok(())
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired user token")))
@@ -81,14 +81,13 @@ impl Client {
            !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let mut response =
-                try!(self.send_request(Method::Get,
-                                       format!("{}friend_requests/{}", self.url, user_id),
-                                       headers,
-                                       None::<&VoidDTO>));
+            let mut response = self.send_request(Method::Get,
+                              format!("{}friend_requests/{}", self.url, user_id),
+                              headers,
+                              None::<&VoidDTO>)?;
             let mut response_str = String::new();
-            let _ = try!(response.read_to_string(&mut response_str));
-            let connections: Vec<PendingFriendRequestDTO> = try!(json::decode(&response_str));
+            let _ = response.read_to_string(&mut response_str)?;
+            let connections: Vec<PendingFriendRequestDTO> = json::decode(&response_str)?;
             Ok(connections.into_iter()
                 .map(|t| PendingFriendRequest::from_dto(t).unwrap())
                 .collect())
@@ -105,13 +104,13 @@ impl Client {
            !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let mut response = try!(self.send_request(Method::Get,
-                                                      format!("{}friends/{}", self.url, user_id),
-                                                      headers,
-                                                      None::<&VoidDTO>));
+            let mut response = self.send_request(Method::Get,
+                              format!("{}friends/{}", self.url, user_id),
+                              headers,
+                              None::<&VoidDTO>)?;
             let mut response_str = String::new();
-            let _ = try!(response.read_to_string(&mut response_str));
-            let friends: Vec<ProfileDTO> = try!(json::decode(&response_str));
+            let _ = response.read_to_string(&mut response_str)?;
+            let friends: Vec<ProfileDTO> = json::decode(&response_str)?;
             Ok(friends.into_iter()
                 .map(|f| Profile::from_dto(f).unwrap())
                 .collect())
@@ -128,12 +127,10 @@ impl Client {
         if access_token.get_user_id().is_some() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let _ = try!(self.send_request(Method::Post,
-                                           format!("{}reject_friend_request/{}",
-                                                   self.url,
-                                                   request_id),
-                                           headers,
-                                           None::<&VoidDTO>));
+            let _ = self.send_request(Method::Post,
+                              format!("{}reject_friend_request/{}", self.url, request_id),
+                              headers,
+                              None::<&VoidDTO>)?;
             Ok(())
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired user or admin \
@@ -148,10 +145,10 @@ impl Client {
         if access_token.get_user_id().is_some() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let _ = try!(self.send_request(Method::Delete,
-                                           format!("{}friend/{}", self.url, request_id),
-                                           headers,
-                                           None::<&VoidDTO>));
+            let _ = self.send_request(Method::Delete,
+                              format!("{}friend/{}", self.url, request_id),
+                              headers,
+                              None::<&VoidDTO>)?;
             Ok(())
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired user or admin \
