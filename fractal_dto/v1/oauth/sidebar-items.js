@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["ScopeDTO","Enum that represents a scope."],["TokenTypeDTO","Enum representing token type."]],"struct":[["AccessTokenDTO","AccessToken Data type object"],["ClientInfoDTO","Struct with the developer client information"],["CreateClientDTO","Struct for creating a fractal developer"]]});

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Client` struct in crate `fractal_api`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Client">
+
+    <title>fractal_api::v1::Client - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    <link rel="shortcut icon" href="http://test.fractal.global/img/favicon32.png">
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        <a href='../../fractal_api/index.html'><img src='http://test.fractal.global/img/logo.svg' alt='logo' width='100'></a>
+        <p class='location'><a href='../index.html'>fractal_api</a>::<wbr><a href='index.html'>v1</a></p><script>window.sidebarCurrent = {name: 'Client', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>fractal_api</a>::<wbr><a href='index.html'>v1</a>::<wbr><a class='struct' href=''>Client</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-1002' class='srclink' href='../../src/fractal_api/src/v1/mod.rs.html#33-36' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Client { /* fields omitted */ }</pre><div class='docblock'><p>The client struct.</p>
+
+<p>This struct will be in charge of connections to the Fractal Global Credits API.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl <a class='struct' href='../../fractal_api/v1/struct.Client.html' title='fractal_api::v1::Client'>Client</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-478' class='srclink' href='../../src/fractal_api/src/v1/client.rs.html#8-42' title='goto source code'>[src]</a></span></h3>
+<div class='docblock'><p>Client creation and modification.</p>
+</div><div class='impl-items'><h4 id='method.new' class='method'><span id='new.v' class='invisible'><code>fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class='struct' href='../../fractal_api/v1/struct.Client.html' title='fractal_api::v1::Client'>Client</a></code></span></h4>
+<div class='docblock'><p>Creates a new Fractal Global Credits API client.</p>
+</div><h4 id='method.new_with_url' class='method'><span id='new_with_url.v' class='invisible'><code>fn <a href='#method.new_with_url' class='fnname'>new_with_url</a>&lt;S:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;(url: S) -&gt; <a class='struct' href='../../fractal_api/v1/struct.Client.html' title='fractal_api::v1::Client'>Client</a></code></span></h4>
+<div class='docblock'><p>Creates a new Fractal Global Credits API client.</p>
+</div><h4 id='method.new_dev' class='method'><span id='new_dev.v' class='invisible'><code>fn <a href='#method.new_dev' class='fnname'>new_dev</a>() -&gt; <a class='struct' href='../../fractal_api/v1/struct.Client.html' title='fractal_api::v1::Client'>Client</a></code></span></h4>
+<div class='docblock'><p>Creates a new Fractal Global Credits API development client.</p>
+</div><h4 id='method.set_read_timeout' class='method'><span id='set_read_timeout.v' class='invisible'><code>fn <a href='#method.set_read_timeout' class='fnname'>set_read_timeout</a>(&amp;mut self, timeout: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/std/time/duration/struct.Duration.html' title='std::time::duration::Duration'>Duration</a>&gt;)</code></span></h4>
+<div class='docblock'><p>Sets the read timeout for requests.</p>
+</div><h4 id='method.set_write_timeout' class='method'><span id='set_write_timeout.v' class='invisible'><code>fn <a href='#method.set_write_timeout' class='fnname'>set_write_timeout</a>(&amp;mut self, timeout: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/std/time/duration/struct.Duration.html' title='std::time::duration::Duration'>Duration</a>&gt;)</code></span></h4>
+<div class='docblock'><p>Sets the write timeout for requests.</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class='struct' href='../../fractal_api/v1/struct.Client.html' title='fractal_api::v1::Client'>Client</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-570' class='srclink' href='../../src/fractal_api/src/v1/oauth.rs.html#122-180' title='goto source code'>[src]</a></span></h3>
+<div class='docblock'><p>OAuth methods for clients.</p>
+</div><div class='impl-items'><h4 id='method.token' class='method'><span id='token.v' class='invisible'><code>fn <a href='#method.token' class='fnname'>token</a>&lt;S:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;(&amp;self, app_id: S, secret: S) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>&gt;</code></span></h4>
+<div class='docblock'><p>Gets a token from the API.</p>
+</div><h4 id='method.create_client' class='method'><span id='create_client.v' class='invisible'><code>fn <a href='#method.create_client' class='fnname'>create_client</a>&lt;S:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, name: S, scopes: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='enum' href='../../fractal_dto/v1/oauth/enum.ScopeDTO.html' title='fractal_dto::v1::oauth::ScopeDTO'>Scope</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>, request_limit: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>&gt;) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='struct' href='../../fractal_api/v1/types/struct.ClientInfo.html' title='fractal_api::v1::types::ClientInfo'>ClientInfo</a>&gt;</code></span></h4>
+<div class='docblock'><p>Creates a client</p>
+
+<p>Creates a client with the given name, scopes and request limit per hour. An admin scoped
+token is required to use this API call.</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class='struct' href='../../fractal_api/v1/struct.Client.html' title='fractal_api::v1::Client'>Client</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-608' class='srclink' href='../../src/fractal_api/src/v1/public.rs.html#16-131' title='goto source code'>[src]</a></span></h3>
+<div class='docblock'><p>Public methods for the client.</p>
+
+<p>These are the public methods for getting a token, creating and logging in users, and confirming
+their information.</p>
+</div><div class='impl-items'><h4 id='method.register' class='method'><span id='register.v' class='invisible'><code>fn <a href='#method.register' class='fnname'>register</a>&lt;S:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, username: S, password: S, email: S) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Registers the user</p>
+</div><h4 id='method.login' class='method'><span id='login.v' class='invisible'><code>fn <a href='#method.login' class='fnname'>login</a>&lt;S:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, user_email: S, password: S, remember_me: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>&gt;</code></span></h4>
+<div class='docblock'><p>Logs the user in</p>
+</div><h4 id='method.confirm_email' class='method'><span id='confirm_email.v' class='invisible'><code>fn <a href='#method.confirm_email' class='fnname'>confirm_email</a>&lt;S:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, email_key: S) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Confirms the users email</p>
+</div><h4 id='method.start_reset_password' class='method'><span id='start_reset_password.v' class='invisible'><code>fn <a href='#method.start_reset_password' class='fnname'>start_reset_password</a>&lt;S:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, username: S, email: S) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Begins a the reset password procecss</p>
+</div><h4 id='method.reset_password' class='method'><span id='reset_password.v' class='invisible'><code>fn <a href='#method.reset_password' class='fnname'>reset_password</a>&lt;S:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, password_key: S, new_password: S) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Attempts to confirm the new password reset</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class='struct' href='../../fractal_api/v1/struct.Client.html' title='fractal_api::v1::Client'>Client</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-675' class='srclink' href='../../src/fractal_api/src/v1/user.rs.html#20-471' title='goto source code'>[src]</a></span></h3>
+<div class='docblock'><p>User methods for the client.</p>
+
+<p>This are the user getters, setters and creators for the client.</p>
+</div><div class='impl-items'><h4 id='method.resend_email_confirmation' class='method'><span id='resend_email_confirmation.v' class='invisible'><code>fn <a href='#method.resend_email_confirmation' class='fnname'>resend_email_confirmation</a>(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Resends the email confirmation</p>
+</div><h4 id='method.get_user' class='method'><span id='get_user.v' class='invisible'><code>fn <a href='#method.get_user' class='fnname'>get_user</a>(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, user_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='struct' href='../../fractal_api/v1/types/struct.User.html' title='fractal_api::v1::types::User'>User</a>&gt;</code></span></h4>
+<div class='docblock'><p>Get the user</p>
+</div><h4 id='method.get_me' class='method'><span id='get_me.v' class='invisible'><code>fn <a href='#method.get_me' class='fnname'>get_me</a>(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='struct' href='../../fractal_api/v1/types/struct.User.html' title='fractal_api::v1::types::User'>User</a>&gt;</code></span></h4>
+<div class='docblock'><p>Gets the logged in users info</p>
+</div><h4 id='method.get_all_users' class='method'><span id='get_all_users.v' class='invisible'><code>fn <a href='#method.get_all_users' class='fnname'>get_all_users</a>(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../fractal_api/v1/types/struct.User.html' title='fractal_api::v1::types::User'>User</a>&gt;&gt;</code></span></h4>
+<div class='docblock'><p>Gets all users.</p>
+</div><h4 id='method.delete_user' class='method'><span id='delete_user.v' class='invisible'><code>fn <a href='#method.delete_user' class='fnname'>delete_user</a>(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, user_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Deletes the given user.</p>
+</div><h4 id='method.generate_authenticator_code' class='method'><span id='generate_authenticator_code.v' class='invisible'><code>fn <a href='#method.generate_authenticator_code' class='fnname'>generate_authenticator_code</a>(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;</code></span></h4>
+<div class='docblock'><p>Generates a new authenticator code, and returns the URL.</p>
+</div><h4 id='method.authenticate' class='method'><span id='authenticate.v' class='invisible'><code>fn <a href='#method.authenticate' class='fnname'>authenticate</a>(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, code: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a>) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Authenticates the user with 2FA</p>
+</div><h4 id='method.set_username' class='method'><span id='set_username.v' class='invisible'><code>fn <a href='#method.set_username' class='fnname'>set_username</a>&lt;S:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, user_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, username: S) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Sets the users username</p>
+</div><h4 id='method.set_phone' class='method'><span id='set_phone.v' class='invisible'><code>fn <a href='#method.set_phone' class='fnname'>set_phone</a>&lt;S:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, user_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, phone: S) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Sets the users phone</p>
+</div><h4 id='method.set_birthday' class='method'><span id='set_birthday.v' class='invisible'><code>fn <a href='#method.set_birthday' class='fnname'>set_birthday</a>(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, user_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, birthday: <a class='struct' href='../../chrono/naive/date/struct.NaiveDate.html' title='chrono::naive::date::NaiveDate'>NaiveDate</a>) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Sets the users birthday</p>
+</div><h4 id='method.set_name' class='method'><span id='set_name.v' class='invisible'><code>fn <a href='#method.set_name' class='fnname'>set_name</a>&lt;S:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, user_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, first: S, last: S) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Sets the users first and last name</p>
+</div><h4 id='method.set_email' class='method'><span id='set_email.v' class='invisible'><code>fn <a href='#method.set_email' class='fnname'>set_email</a>&lt;S:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, user_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, email: S) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Sets the users email</p>
+</div><h4 id='method.set_image' class='method'><span id='set_image.v' class='invisible'><code>fn <a href='#method.set_image' class='fnname'>set_image</a>&lt;S:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, user_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, image_url: S) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Sets the users profile picture to the given URL</p>
+</div><h4 id='method.set_address' class='method'><span id='set_address.v' class='invisible'><code>fn <a href='#method.set_address' class='fnname'>set_address</a>(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, user_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, address: <a class='struct' href='../../fractal_utils/location/struct.Address.html' title='fractal_utils::location::Address'>Address</a>) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Sets the users address</p>
+</div><h4 id='method.set_password' class='method'><span id='set_password.v' class='invisible'><code>fn <a href='#method.set_password' class='fnname'>set_password</a>&lt;S:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, old_password: S, new_password: S) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Sets the user password</p>
+</div><h4 id='method.search_user_random' class='method'><span id='search_user_random.v' class='invisible'><code>fn <a href='#method.search_user_random' class='fnname'>search_user_random</a>&lt;S:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, random: S, include_me: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>, include_friends: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../fractal_api/v1/types/struct.Profile.html' title='fractal_api::v1::types::Profile'>Profile</a>&gt;&gt;</code></span></h4>
+<div class='docblock'><p>Searches users doing a random search with the given string. It will try to find the string
+in names, emails etc.</p>
+
+<p>It will panic if the <code>include_me</code> or <code>include_friends</code> variables are set and the token is
+not an user scoped token.</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class='struct' href='../../fractal_api/v1/struct.Client.html' title='fractal_api::v1::Client'>Client</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-855' class='srclink' href='../../src/fractal_api/src/v1/friends.rs.html#17-159' title='goto source code'>[src]</a></span></h3>
+<div class='docblock'><p>Methods for working with friend requests.</p>
+</div><div class='impl-items'><h4 id='method.send_friend_request' class='method'><span id='send_friend_request.v' class='invisible'><code>fn <a href='#method.send_friend_request' class='fnname'>send_friend_request</a>&lt;S:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, user: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, relation: <a class='enum' href='../../fractal_dto/v1/friends/enum.RelationshipDTO.html' title='fractal_dto::v1::friends::RelationshipDTO'>Relationship</a>, message: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;S&gt;) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Creates a pending invitation to connect to the user</p>
+</div><h4 id='method.confirm_friend_request' class='method'><span id='confirm_friend_request.v' class='invisible'><code>fn <a href='#method.confirm_friend_request' class='fnname'>confirm_friend_request</a>(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, request_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, user: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Confirms a connection</p>
+</div><h4 id='method.get_friend_requests' class='method'><span id='get_friend_requests.v' class='invisible'><code>fn <a href='#method.get_friend_requests' class='fnname'>get_friend_requests</a>(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, user_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../fractal_api/v1/types/struct.PendingFriendRequest.html' title='fractal_api::v1::types::PendingFriendRequest'>PendingFriendRequest</a>&gt;&gt;</code></span></h4>
+<div class='docblock'><p>Gets all the pending friend requests for the given user.</p>
+</div><h4 id='method.get_friends' class='method'><span id='get_friends.v' class='invisible'><code>fn <a href='#method.get_friends' class='fnname'>get_friends</a>(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, user_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../fractal_api/v1/types/struct.Profile.html' title='fractal_api::v1::types::Profile'>Profile</a>&gt;&gt;</code></span></h4>
+<div class='docblock'><p>Returns the given users friends</p>
+</div><h4 id='method.reject_friend_request' class='method'><span id='reject_friend_request.v' class='invisible'><code>fn <a href='#method.reject_friend_request' class='fnname'>reject_friend_request</a>(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, request_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Rejects the friend request for the given user</p>
+</div><h4 id='method.unfriend' class='method'><span id='unfriend.v' class='invisible'><code>fn <a href='#method.unfriend' class='fnname'>unfriend</a>(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, request_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Unfriends the given user</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class='struct' href='../../fractal_api/v1/struct.Client.html' title='fractal_api::v1::Client'>Client</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-934' class='srclink' href='../../src/fractal_api/src/v1/transaction.rs.html#18-151' title='goto source code'>[src]</a></span></h3>
+<div class='docblock'><p>Methods for working with transactions.</p>
+</div><div class='impl-items'><h4 id='method.get_transaction' class='method'><span id='get_transaction.v' class='invisible'><code>fn <a href='#method.get_transaction' class='fnname'>get_transaction</a>(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, transaction_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='struct' href='../../fractal_api/v1/types/struct.Transaction.html' title='fractal_api::v1::types::Transaction'>Transaction</a>&gt;</code></span></h4>
+<div class='docblock'><p>Gets the given transaction, if authorized.</p>
+</div><h4 id='method.new_transaction' class='method'><span id='new_transaction.v' class='invisible'><code>fn <a href='#method.new_transaction' class='fnname'>new_transaction</a>(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, receiver_wallet: <a class='struct' href='../../fractal_utils/wallet_address/struct.WalletAddress.html' title='fractal_utils::wallet_address::WalletAddress'>WalletAddress</a>, receiver_id: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, amount: <a class='struct' href='../../fractal_utils/amount/struct.Amount.html' title='fractal_utils::amount::Amount'>Amount</a>) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;</code></span></h4>
+<div class='docblock'><p>Generates a new transaction. Returns the code of the transaction</p>
+</div><h4 id='method.get_all_transactions' class='method'><span id='get_all_transactions.v' class='invisible'><code>fn <a href='#method.get_all_transactions' class='fnname'>get_all_transactions</a>(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, first_transaction: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../fractal_api/v1/types/struct.Transaction.html' title='fractal_api::v1::types::Transaction'>Transaction</a>&gt;&gt;</code></span></h4>
+<div class='docblock'><p>Gets all the transactions since the given transaction</p>
+</div><h4 id='method.authenticate_transaction' class='method'><span id='authenticate_transaction.v' class='invisible'><code>fn <a href='#method.authenticate_transaction' class='fnname'>authenticate_transaction</a>&lt;S:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, transaction_key: S, code: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u32.html'>u32</a>) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Authenticates the pending transaction</p>
+</div><h4 id='method.get_user_id_from_wallet_address' class='method'><span id='get_user_id_from_wallet_address.v' class='invisible'><code>fn <a href='#method.get_user_id_from_wallet_address' class='fnname'>get_user_id_from_wallet_address</a>&lt;S:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;(&amp;self, access_token: &amp;<a class='struct' href='../../fractal_api/v1/oauth/struct.AccessToken.html' title='fractal_api::v1::oauth::AccessToken'>AccessToken</a>, wallet_address: S) -&gt; <a class='type' href='../../fractal_api/error/type.Result.html' title='fractal_api::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>&gt;</code></span></h4>
+<div class='docblock'><p>Checks if the given wallet address is a valid wallet address and returns its associated
+user id</p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "fractal_api";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

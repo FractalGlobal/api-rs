@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ClientInfo","Information about the API client."],["PendingFriendRequest","Pending friend request."],["Profile","Struct that holds all the profile information for the user."],["Transaction","The representation of a global credit transaction"],["User","Struct that holds all personal information for the user."]]});

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `User` struct in crate `fractal_api`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, User">
+
+    <title>fractal_api::v1::types::User - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+    
+
+    <link rel="shortcut icon" href="http://test.fractal.global/img/favicon32.png">
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        <a href='../../../fractal_api/index.html'><img src='http://test.fractal.global/img/logo.svg' alt='logo' width='100'></a>
+        <p class='location'><a href='../../index.html'>fractal_api</a>::<wbr><a href='../index.html'>v1</a>::<wbr><a href='index.html'>types</a></p><script>window.sidebarCurrent = {name: 'User', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../../index.html'>fractal_api</a>::<wbr><a href='../index.html'>v1</a>::<wbr><a href='index.html'>types</a>::<wbr><a class='struct' href=''>User</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-218' class='srclink' href='../../../src/fractal_api/src/v1/types.rs.html#177-222' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct User { /* fields omitted */ }</pre><div class='docblock'><p>Struct that holds all personal information for the user.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl <a class='struct' href='../../../fractal_api/v1/types/struct.User.html' title='fractal_api::v1::types::User'>User</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-293' class='srclink' href='../../../src/fractal_api/src/v1/types.rs.html#224-397' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.get_id' class='method'><span id='get_id.v' class='invisible'><code>fn <a href='#method.get_id' class='fnname'>get_id</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a></code></span></h4>
+<div class='docblock'><p>Gets the ID of the user.</p>
+</div><h4 id='method.get_username' class='method'><span id='get_username.v' class='invisible'><code>fn <a href='#method.get_username' class='fnname'>get_username</a>(&amp;self) -&gt; &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></span></h4>
+<div class='docblock'><p>Gets the username of the user.</p>
+</div><h4 id='method.get_display_name' class='method'><span id='get_display_name.v' class='invisible'><code>fn <a href='#method.get_display_name' class='fnname'>get_display_name</a>(&amp;self) -&gt; &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></span></h4>
+<div class='docblock'><p>Gets the displayname of the user</p>
+</div><h4 id='method.get_email' class='method'><span id='get_email.v' class='invisible'><code>fn <a href='#method.get_email' class='fnname'>get_email</a>(&amp;self) -&gt; &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></span></h4>
+<div class='docblock'><p>Gets the email of the user.</p>
+</div><h4 id='method.is_email_confirmed' class='method'><span id='is_email_confirmed.v' class='invisible'><code>fn <a href='#method.is_email_confirmed' class='fnname'>is_email_confirmed</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h4>
+<div class='docblock'><p>Returns wether the email of the user has been confirmed or not.</p>
+</div><h4 id='method.get_first_name' class='method'><span id='get_first_name.v' class='invisible'><code>fn <a href='#method.get_first_name' class='fnname'>get_first_name</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;</code></span></h4>
+<div class='docblock'><p>Gets the first name of the user, if it has been set.</p>
+</div><h4 id='method.is_first_name_confirmed' class='method'><span id='is_first_name_confirmed.v' class='invisible'><code>fn <a href='#method.is_first_name_confirmed' class='fnname'>is_first_name_confirmed</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h4>
+<div class='docblock'><p>Returns wether the first name of the user has been confirmed or not.</p>
+</div><h4 id='method.get_last_name' class='method'><span id='get_last_name.v' class='invisible'><code>fn <a href='#method.get_last_name' class='fnname'>get_last_name</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;</code></span></h4>
+<div class='docblock'><p>Gets the last name of the user, if it has been set.</p>
+</div><h4 id='method.is_last_name_confirmed' class='method'><span id='is_last_name_confirmed.v' class='invisible'><code>fn <a href='#method.is_last_name_confirmed' class='fnname'>is_last_name_confirmed</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h4>
+<div class='docblock'><p>Returns wether the last name of the user has been confirmed or not.</p>
+</div><h4 id='method.get_device_count' class='method'><span id='get_device_count.v' class='invisible'><code>fn <a href='#method.get_device_count' class='fnname'>get_device_count</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a></code></span></h4>
+<div class='docblock'><p>Gets the device count of the user.</p>
+</div><h4 id='method.wallet_addresses' class='method'><span id='wallet_addresses.v' class='invisible'><code>fn <a href='#method.wallet_addresses' class='fnname'>wallet_addresses</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/collections/btree/set/struct.Iter.html' title='collections::btree::set::Iter'>Iter</a>&lt;<a class='struct' href='../../../fractal_utils/wallet_address/struct.WalletAddress.html' title='fractal_utils::wallet_address::WalletAddress'>WalletAddress</a>&gt;</code></span></h4>
+<div class='docblock'><p>Gets an iterator through the wallet addresses of the user.</p>
+</div><h4 id='method.get_checking_balance' class='method'><span id='get_checking_balance.v' class='invisible'><code>fn <a href='#method.get_checking_balance' class='fnname'>get_checking_balance</a>(&amp;self) -&gt; <a class='struct' href='../../../fractal_utils/amount/struct.Amount.html' title='fractal_utils::amount::Amount'>Amount</a></code></span></h4>
+<div class='docblock'><p>Gets the checking balance of the user.</p>
+</div><h4 id='method.get_cold_balance' class='method'><span id='get_cold_balance.v' class='invisible'><code>fn <a href='#method.get_cold_balance' class='fnname'>get_cold_balance</a>(&amp;self) -&gt; <a class='struct' href='../../../fractal_utils/amount/struct.Amount.html' title='fractal_utils::amount::Amount'>Amount</a></code></span></h4>
+<div class='docblock'><p>Gets the cold balance of the user.</p>
+</div><h4 id='method.bonds' class='method'><span id='bonds.v' class='invisible'><code>fn <a href='#method.bonds' class='fnname'>bonds</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/std/collections/hash/map/struct.Iter.html' title='std::collections::hash::map::Iter'>Iter</a>&lt;<a class='struct' href='../../../chrono/datetime/struct.DateTime.html' title='chrono::datetime::DateTime'>DateTime</a>&lt;<a class='struct' href='../../../chrono/offset/utc/struct.UTC.html' title='chrono::offset::utc::UTC'>UTC</a>&gt;,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>&gt;</code></span></h4>
+<div class='docblock'><p>Gets the bonds purchased by the user.</p>
+</div><h4 id='method.get_birthday' class='method'><span id='get_birthday.v' class='invisible'><code>fn <a href='#method.get_birthday' class='fnname'>get_birthday</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../../../chrono/naive/date/struct.NaiveDate.html' title='chrono::naive::date::NaiveDate'>NaiveDate</a>&gt;</code></span></h4>
+<div class='docblock'><p>Gets the birthday of the user, if it has been set.</p>
+</div><h4 id='method.is_birthday_confirmed' class='method'><span id='is_birthday_confirmed.v' class='invisible'><code>fn <a href='#method.is_birthday_confirmed' class='fnname'>is_birthday_confirmed</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h4>
+<div class='docblock'><p>Returns wether the birthday of the user has been confirmed or not.</p>
+</div><h4 id='method.get_phone' class='method'><span id='get_phone.v' class='invisible'><code>fn <a href='#method.get_phone' class='fnname'>get_phone</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;</code></span></h4>
+<div class='docblock'><p>Gets the phone of the user, if it has been set.</p>
+</div><h4 id='method.is_phone_confirmed' class='method'><span id='is_phone_confirmed.v' class='invisible'><code>fn <a href='#method.is_phone_confirmed' class='fnname'>is_phone_confirmed</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h4>
+<div class='docblock'><p>Returns wether the phone of the user has been confirmed or not.</p>
+</div><h4 id='method.get_image_url' class='method'><span id='get_image_url.v' class='invisible'><code>fn <a href='#method.get_image_url' class='fnname'>get_image_url</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;</code></span></h4>
+<div class='docblock'><p>Gets the image of the user, if it has been set.</p>
+</div><h4 id='method.get_address' class='method'><span id='get_address.v' class='invisible'><code>fn <a href='#method.get_address' class='fnname'>get_address</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;<a class='struct' href='../../../fractal_utils/location/struct.Address.html' title='fractal_utils::location::Address'>Address</a>&gt;</code></span></h4>
+<div class='docblock'><p>Gets the address of the user, if it has been set.</p>
+</div><h4 id='method.is_address_confirmed' class='method'><span id='is_address_confirmed.v' class='invisible'><code>fn <a href='#method.is_address_confirmed' class='fnname'>is_address_confirmed</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h4>
+<div class='docblock'><p>Returns wether the address of the user is confirmed or not.</p>
+</div><h4 id='method.get_sybil_score' class='method'><span id='get_sybil_score.v' class='invisible'><code>fn <a href='#method.get_sybil_score' class='fnname'>get_sybil_score</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i8.html'>i8</a></code></span></h4>
+<div class='docblock'><p>Gets the sybil score of the user.</p>
+</div><h4 id='method.get_trust_score' class='method'><span id='get_trust_score.v' class='invisible'><code>fn <a href='#method.get_trust_score' class='fnname'>get_trust_score</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i8.html'>i8</a></code></span></h4>
+<div class='docblock'><p>Gets the trust score of the user.</p>
+</div><h4 id='method.is_enabled' class='method'><span id='is_enabled.v' class='invisible'><code>fn <a href='#method.is_enabled' class='fnname'>is_enabled</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h4>
+<div class='docblock'><p>Returns wether the user is enabled or not.</p>
+</div><h4 id='method.get_registration_time' class='method'><span id='get_registration_time.v' class='invisible'><code>fn <a href='#method.get_registration_time' class='fnname'>get_registration_time</a>(&amp;self) -&gt; <a class='struct' href='../../../chrono/datetime/struct.DateTime.html' title='chrono::datetime::DateTime'>DateTime</a>&lt;<a class='struct' href='../../../chrono/offset/utc/struct.UTC.html' title='chrono::offset::utc::UTC'>UTC</a>&gt;</code></span></h4>
+<div class='docblock'><p>Gets the registration time of the user.</p>
+</div><h4 id='method.get_last_activity' class='method'><span id='get_last_activity.v' class='invisible'><code>fn <a href='#method.get_last_activity' class='fnname'>get_last_activity</a>(&amp;self) -&gt; <a class='struct' href='../../../chrono/datetime/struct.DateTime.html' title='chrono::datetime::DateTime'>DateTime</a>&lt;<a class='struct' href='../../../chrono/offset/utc/struct.UTC.html' title='chrono::offset::utc::UTC'>UTC</a>&gt;</code></span></h4>
+<div class='docblock'><p>Gets the last activity time of the user.</p>
+</div><h4 id='method.is_banned' class='method'><span id='is_banned.v' class='invisible'><code>fn <a href='#method.is_banned' class='fnname'>is_banned</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h4>
+<div class='docblock'><p>Returns wether the user is banned or not.</p>
+</div><h4 id='method.ban_expiration' class='method'><span id='ban_expiration.v' class='invisible'><code>fn <a href='#method.ban_expiration' class='fnname'>ban_expiration</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../../../chrono/datetime/struct.DateTime.html' title='chrono::datetime::DateTime'>DateTime</a>&lt;<a class='struct' href='../../../chrono/offset/utc/struct.UTC.html' title='chrono::offset::utc::UTC'>UTC</a>&gt;&gt;</code></span></h4>
+<div class='docblock'><p>Returns the ban&#39;s expiration time, if it has been set.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../../../fractal_api/v1/types/struct.User.html' title='fractal_api::v1::types::User'>User</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-241' class='srclink' href='../../../src/fractal_api/src/v1/types.rs.html#176' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.clone' class='method'><span id='clone.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../../../fractal_api/v1/types/struct.User.html' title='fractal_api::v1::types::User'>User</a></code></span></h4>
+<div class='docblock'><p>Returns a copy of the value. <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone">Read more</a></p>
+</div><h4 id='method.clone_from' class='method'><span id='clone_from.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code><div class='since' title='Stable since Rust version 1.0.0'>1.0.0</div></span></h4>
+<div class='docblock'><p>Performs copy-assignment from <code>source</code>. <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from">Read more</a></p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='struct' href='../../../fractal_api/v1/types/struct.User.html' title='fractal_api::v1::types::User'>User</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-266' class='srclink' href='../../../src/fractal_api/src/v1/types.rs.html#176' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.fmt' class='method'><span id='fmt.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></span></h4>
+<div class='docblock'><p>Formats the value using the given formatter.</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='../../../fractal_dto/trait.FromDTO.html' title='fractal_dto::FromDTO'>FromDTO</a>&lt;<a class='struct' href='../../../fractal_dto/v1/user/struct.UserDTO.html' title='fractal_dto::v1::user::UserDTO'>UserDTO</a>&gt; for <a class='struct' href='../../../fractal_api/v1/types/struct.User.html' title='fractal_api::v1::types::User'>User</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-378' class='srclink' href='../../../src/fractal_api/src/v1/types.rs.html#498-551' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.from_dto' class='method'><span id='from_dto.v' class='invisible'><code>fn <a href='../../../fractal_dto/trait.FromDTO.html#tymethod.from_dto' class='fnname'>from_dto</a>(dto: <a class='struct' href='../../../fractal_dto/v1/user/struct.UserDTO.html' title='fractal_dto::v1::user::UserDTO'>UserDTO</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>StdResult</a>&lt;<a class='struct' href='../../../fractal_api/v1/types/struct.User.html' title='fractal_api::v1::types::User'>User</a>,&nbsp;<a class='struct' href='../../../fractal_dto/error/struct.FromDTOError.html' title='fractal_dto::error::FromDTOError'>FromDTOError</a>&gt;</code></span></h4>
+<div class='docblock'><p>the from dto wrapper</p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "fractal_api";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script defer src="../../../search-index.js"></script>
+</body>
+</html>

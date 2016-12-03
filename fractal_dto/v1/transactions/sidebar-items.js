@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["GenerateTransactionDTO","Struct used to generate a transaction."],["PendingTransactionDTO","Struct for pending transactions."],["TransactionDTO","Struct for tansactions."]]});

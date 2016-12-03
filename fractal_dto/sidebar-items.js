@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["error","Error module."],["v1","DTOs for the first version of the API."]],"trait":[["DTO","The dto trate to make it Encodeable and Decodable into fractal objects"],["FromDTO","creates an object from a dto"]]});

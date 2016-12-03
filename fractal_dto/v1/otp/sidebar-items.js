@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["AuthenticationCodeDTO","The 6 digit authentication code struct"]]});

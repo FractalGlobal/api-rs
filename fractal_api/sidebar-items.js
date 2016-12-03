@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["error","Error module"],["v1","First version of the Fractal Global Credits API."]]});

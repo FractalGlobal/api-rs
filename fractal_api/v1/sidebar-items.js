@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["FRACTAL_DEV_SERVER","Fractal development API server."],["FRACTAL_SERVER","Fractal API server."]],"mod":[["oauth","OAuth module for the Fractal API."],["types","Types returned by the API."]],"struct":[["Client","The client struct."]]});

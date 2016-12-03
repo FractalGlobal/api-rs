@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["LoginDTO","The login date type object"],["NewPasswordDTO","The new password data type object"],["RegisterDTO","Struct for signup verification"],["ResetPasswordDTO","Struct to reset the users password"]]});
