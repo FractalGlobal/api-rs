@@ -1,6 +1,6 @@
 [package]
 name = "fractal-api"
-version = "0.5.0"
+version = "0.5.1"
 authors = [
     "Iban Eguia <iban@fractal.global>",
     "Eric Remigino <eric@fractal.global>",
@@ -8,7 +8,7 @@ authors = [
 license = "MIT/Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/FractalGlobal/api-rs"
-documentation = "http://fractal.global/api-rs"
+documentation = "https://docs.rs/fractal-api/"
 description = """
 Fractal Global Credits API client library
 """
