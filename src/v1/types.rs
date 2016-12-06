@@ -191,12 +191,12 @@ pub struct User {
     device_count: u8,
     /// The list of users wallet addresses
     wallet_addresses: BTreeSet<WalletAddress>,
-    /// The users pending balance
-    pending_balance: Amount,
     /// The checking wallet balance
     checking_balance: Amount,
     /// The cold wallet balance
     cold_balance: Amount,
+    /// The users pending balance
+    pending_balance: Amount,
     /// The users bonds
     bonds: HashMap<DateTime<UTC>, u64>,
     /// the users date of birth
@@ -297,6 +297,11 @@ impl User {
     /// Gets the cold balance of the user.
     pub fn get_cold_balance(&self) -> Amount {
         self.cold_balance
+    }
+
+    /// Gets the pending balance of the user.
+    pub fn get_pending_balance(&self) -> Amount {
+        self.pending_balance
     }
 
     /// Gets the bonds purchased by the user.
