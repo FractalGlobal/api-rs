@@ -16,12 +16,12 @@ use super::oauth::AccessToken;
 /// Methods for working with friend requests.
 impl Client {
     /// Creates a pending invitation to connect to the user
-    pub fn send_friend_request<S: AsRef<str>>(&self,
-                                              access_token: &AccessToken,
-                                              user: u64,
-                                              relation: Relationship,
-                                              message: Option<S>)
-                                              -> Result<()> {
+    pub fn send_friend_request<M: Into<String>>(&self,
+                                                access_token: &AccessToken,
+                                                user: u64,
+                                                relation: Relationship,
+                                                message: Option<M>)
+                                                -> Result<()> {
         let user_id = access_token.get_user_id();
         if user_id.is_some() && !access_token.has_expired() {
             let mut headers = Headers::new();
@@ -30,10 +30,7 @@ impl Client {
                 origin_id: user_id.unwrap(),
                 destination_id: user,
                 relationship: relation,
-                message: match message {
-                    Some(m) => Some(String::from(m.as_ref())),
-                    None => None,
-                },
+                message: message.and_then(|mess| Some(mess.into())),
             };
             let _ = self.send_request(Method::Post,
                               format!("{}create_friend_request", self.url),

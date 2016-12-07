@@ -15,19 +15,22 @@ use super::oauth::AccessToken;
 /// their information.
 impl Client {
     /// Registers the user
-    pub fn register<S: AsRef<str>>(&self,
-                                   access_token: &AccessToken,
-                                   username: S,
-                                   password: S,
-                                   email: S)
-                                   -> Result<()> {
+    pub fn register<U: Into<String>, P: Into<String>, E: Into<String>, R: Into<String>>
+        (&self,
+         access_token: &AccessToken,
+         username: U,
+         password: P,
+         email: E,
+         referer: Option<R>)
+         -> Result<()> {
         if access_token.is_public() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let dto = RegisterDTO {
-                username: String::from(username.as_ref()),
-                password: String::from(password.as_ref()),
-                email: String::from(email.as_ref()),
+                username: username.into(),
+                password: password.into(),
+                email: email.into(),
+                referer: referer.and_then(|pass| Some(pass.into())),
             };
             let _ = self.send_request(Method::Post,
                               format!("{}register", self.url),
@@ -42,18 +45,18 @@ impl Client {
     // TODO register_encrypted
 
     /// Logs the user in
-    pub fn login<S: AsRef<str>>(&self,
-                                access_token: &AccessToken,
-                                user_email: S,
-                                password: S,
-                                remember_me: bool)
-                                -> Result<AccessToken> {
+    pub fn login<UM: Into<String>, P: Into<String>>(&self,
+                                                    access_token: &AccessToken,
+                                                    user_email: UM,
+                                                    password: P,
+                                                    remember_me: bool)
+                                                    -> Result<AccessToken> {
         if access_token.is_public() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let dto = LoginDTO {
-                user_email: String::from(user_email.as_ref()),
-                password: String::from(password.as_ref()),
+                user_email: user_email.into(),
+                password: password.into(),
                 remember_me: remember_me,
             };
             let mut response = self.send_request(Method::Post,
@@ -87,17 +90,17 @@ impl Client {
     }
 
     /// Begins a the reset password procecss
-    pub fn start_reset_password<S: AsRef<str>>(&self,
-                                               access_token: &AccessToken,
-                                               username: S,
-                                               email: S)
-                                               -> Result<()> {
+    pub fn start_reset_password<U: Into<String>, E: Into<String>>(&self,
+                                                                  access_token: &AccessToken,
+                                                                  username: U,
+                                                                  email: E)
+                                                                  -> Result<()> {
         if access_token.is_public() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let dto = ResetPasswordDTO {
-                username: String::from(username.as_ref()),
-                email: String::from(email.as_ref()),
+                username: username.into(),
+                email: email.into(),
             };
             let _ = self.send_request(Method::Post,
                               format!("{}start_reset_password", self.url),
@@ -110,15 +113,15 @@ impl Client {
     }
 
     /// Attempts to confirm the new password reset
-    pub fn reset_password<S: AsRef<str>>(&self,
-                                         access_token: &AccessToken,
-                                         password_key: S,
-                                         new_password: S)
-                                         -> Result<()> {
+    pub fn reset_password<K: AsRef<str>, P: Into<String>>(&self,
+                                                          access_token: &AccessToken,
+                                                          password_key: K,
+                                                          new_password: P)
+                                                          -> Result<()> {
         if access_token.is_public() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let dto = NewPasswordDTO { new_password: String::from(new_password.as_ref()) };
+            let dto = NewPasswordDTO { new_password: new_password.into() };
             let _ = self.send_request(Method::Post,
                               format!("{}reset_password/{}", self.url, password_key.as_ref()),
                               headers,

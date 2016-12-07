@@ -3,6 +3,9 @@
        html_root_url = "http://fractal.global/api-rs/")]
 //! Fractal Global Credits API.
 //!
+//! This library provides methods to access the Fractal Global Credits in Rust. The main object is
+//! the [`Client`](v1/struct.Client.html) object. That object contains all the required methods for
+//! working with the API.
 //!
 //! Using it is as simple as including this in the crate:
 //!
