@@ -1,6 +1,6 @@
 [package]
 name = "fractal-api"
-version = "0.6.0"
+version = "0.7.0"
 authors = [
     "Iban Eguia <iban@fractal.global>",
     "Eric Remigino <eric@fractal.global>",
