@@ -86,7 +86,7 @@ impl Client {
                     }
                     StatusCode::Accepted => {
                         let response_dto: ResponseDTO = json::decode(&response_str)?;
-                        Err(Error::ClientError(response_dto.message))
+                        Err(Error::Client(response_dto.message))
                     }
                     StatusCode::BadRequest => {
                         let response_dto: ResponseDTO = json::decode(&response_str)?;
@@ -98,7 +98,7 @@ impl Client {
                     }
                     _ => {
                         let response_dto: ResponseDTO = json::decode(&response_str)?;
-                        Err(Error::ServerError(response_dto.message))
+                        Err(Error::Server(response_dto.message))
                     }
                 }
             }

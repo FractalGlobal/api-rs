@@ -7,14 +7,6 @@ use super::{Client, FRACTAL_SERVER, FRACTAL_DEV_SERVER};
 /// Client creation and modification.
 impl Client {
     /// Creates a new Fractal Global Credits API client.
-    pub fn new() -> Client {
-        Client {
-            client: HyperClient::new(),
-            url: format!("{}v1/", FRACTAL_SERVER),
-        }
-    }
-
-    /// Creates a new Fractal Global Credits API client.
     pub fn new_with_url<S: AsRef<str>>(url: S) -> Client {
         Client {
             client: HyperClient::new(),
@@ -38,5 +30,14 @@ impl Client {
     /// Sets the write timeout for requests.
     pub fn set_write_timeout(&mut self, timeout: Option<Duration>) {
         self.client.set_write_timeout(timeout);
+    }
+}
+
+impl Default for Client {
+    fn default() -> Client {
+        Client {
+            client: HyperClient::new(),
+            url: format!("{}v1/", FRACTAL_SERVER),
+        }
     }
 }

@@ -352,7 +352,7 @@ impl User {
     /// Gets the address of the user, if it has been set.
     pub fn get_address(&self) -> Option<&Address> {
         match self.address {
-            Some((ref a, _c)) => Some(&a),
+            Some((ref a, _c)) => Some(a),
             None => None,
         }
     }
