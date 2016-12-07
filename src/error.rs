@@ -17,23 +17,23 @@ pub type Result<T> = StdResult<T, Error>;
 #[derive(Debug)]
 pub enum Error {
     /// Hyper request error.
-    HyperError(HyperError),
+    Hyper(HyperError),
     /// IO error.
     IO(io::Error),
     /// Error converting value from DTO object.
-    FromDTOError(FromDTOError),
+    FromDTO(FromDTOError),
     /// JSON decode error.
-    JSONDecodeError(json::DecoderError),
+    JSONDecode(json::DecoderError),
     /// Forbidden.
     Forbidden(String),
     /// Bad request
     BadRequest(String),
     /// Error Logging in
-    ClientError(String),
+    Client(String),
     /// Not found
     NotFound(String),
     /// Internal server error.
-    ServerError(String),
+    Server(String),
     /// The token type is not valid.
     InvalidTokenType,
     /// The scope is not valid.
@@ -41,16 +41,16 @@ pub enum Error {
     /// The secret is not valid.
     InvalidSecret,
     /// Registration error.
-    RegistrationError,
+    Registration,
     /// An error occurred generating a transaction.
-    TransactionError,
+    Transaction,
     /// Connection confirmation error.
-    ConfirmConnectionError,
+    ConfirmConnection,
 }
 
 impl From<HyperError> for Error {
     fn from(error: HyperError) -> Error {
-        Error::HyperError(error)
+        Error::Hyper(error)
     }
 }
 
@@ -62,13 +62,13 @@ impl From<io::Error> for Error {
 
 impl From<json::DecoderError> for Error {
     fn from(error: json::DecoderError) -> Error {
-        Error::JSONDecodeError(error)
+        Error::JSONDecode(error)
     }
 }
 
 impl From<FromDTOError> for Error {
     fn from(error: FromDTOError) -> Error {
-        Error::FromDTOError(error)
+        Error::FromDTO(error)
     }
 }
 
@@ -81,27 +81,27 @@ impl fmt::Display for Error {
 impl StdError for Error {
     fn description(&self) -> &str {
         match *self {
-            Error::HyperError(ref e) => e.description(),
+            Error::Hyper(ref e) => e.description(),
             Error::IO(ref e) => e.description(),
-            Error::FromDTOError(ref e) => e.description(),
-            Error::JSONDecodeError(ref e) => e.description(),
-            Error::Forbidden(ref e) => e,
-            Error::BadRequest(ref e) => e,
-            Error::ClientError(ref e) => e,
-            Error::NotFound(ref e) => e,
-            Error::ServerError(ref e) => e,
-            Error::TransactionError => "error generating transaction",
-            Error::RegistrationError => "error registering user",
+            Error::FromDTO(ref e) => e.description(),
+            Error::JSONDecode(ref e) => e.description(),
+            Error::Forbidden(ref e) |
+            Error::BadRequest(ref e) |
+            Error::Client(ref e) |
+            Error::NotFound(ref e) |
+            Error::Server(ref e) => e,
+            Error::Transaction => "error generating transaction",
+            Error::Registration => "error registering user",
             Error::InvalidTokenType => "the provided token type is not a valid token type",
             Error::InvalidScope => "the provided scope is not a valid scope",
             Error::InvalidSecret => "the provided secret is not a valid secret",
-            Error::ConfirmConnectionError => "error trying to confirm connection",
+            Error::ConfirmConnection => "error trying to confirm connection",
         }
     }
 
     fn cause(&self) -> Option<&StdError> {
         match *self {
-            Error::HyperError(ref e) => Some(e),
+            Error::Hyper(ref e) => Some(e),
             Error::IO(ref e) => Some(e),
             _ => None,
         }

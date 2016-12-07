@@ -71,9 +71,8 @@ impl AccessToken {
     /// Gets the user ID if the token is a user token.
     pub fn get_user_id(&self) -> Option<u64> {
         for scope in &self.scopes {
-            match scope {
-                &Scope::User(id) => return Some(id),
-                _ => {}
+            if let Scope::User(id) = *scope {
+                return Some(id);
             }
         }
         None
@@ -101,7 +100,7 @@ impl FromDTO<AccessTokenDTO> for AccessToken {
             return Err(FromDTOError::new("the token type of the access token is not valid"));
         }
         let scopes: Vec<Scope> = json::decode(&dto.scopes).unwrap();
-        if scopes.len() == 0 {
+        if scopes.is_empty() {
             return Err(FromDTOError::new("there were no scopes in the access token"));
         }
         let expiry_time = UTC::now() + Duration::seconds(dto.expiration);
