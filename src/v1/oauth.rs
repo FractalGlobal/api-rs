@@ -33,15 +33,12 @@ pub struct AccessToken {
 
 impl AccessToken {
     /// Creates an access token from stored data.
-    pub fn from_data(app_id: String,
-                     scopes: Vec<Scope>,
-                     access_token: String,
-                     expiration: DateTime<UTC>)
-                     -> AccessToken {
+    pub fn from_data<I: Into<String>, SV: Into<Vec<Scope>>, T: Into<String>>(
+        app_id: I, scopes: SV, access_token: T, expiration: DateTime<UTC>) -> AccessToken {
         AccessToken {
-            app_id: app_id,
-            scopes: scopes,
-            access_token: access_token,
+            app_id: app_id.into(),
+            scopes: scopes.into(),
+            access_token: access_token.into(),
             expiration: expiration,
         }
     }
@@ -121,14 +118,18 @@ impl FromDTO<AccessTokenDTO> for AccessToken {
 /// OAuth methods for clients.
 impl Client {
     /// Gets a token from the API.
-    pub fn token<S: AsRef<str>>(&self, app_id: S, secret: S) -> Result<AccessToken> {
-        match secret.as_ref().from_base64() {
+    pub fn token<I: Into<String>, S: Into<String>>(&self,
+                                                   app_id: I,
+                                                   secret: S)
+                                                   -> Result<AccessToken> {
+        let secret = secret.into();
+        match secret.from_base64() {
             Ok(b) => {
                 if b.len() == SECRET_LEN {
                     let mut headers = Headers::new();
                     headers.set(Authorization(Basic {
-                        username: String::from(app_id.as_ref()),
-                        password: Some(String::from(secret.as_ref())),
+                        username: app_id.into(),
+                        password: Some(secret),
                     }));
                     let mut response = self.send_request(Method::Get,
                                       format!("{}token", self.url),
@@ -149,20 +150,18 @@ impl Client {
     ///
     /// Creates a client with the given name, scopes and request limit per hour. An admin scoped
     /// token is required to use this API call.
-    pub fn create_client<S: AsRef<str>>(&self,
-                                        access_token: &AccessToken,
-                                        name: S,
-                                        scopes: &[Scope],
-                                        request_limit: Option<usize>)
-                                        -> Result<ClientInfo> {
+    pub fn create_client<N: Into<String>, SV: Into<Vec<Scope>>>(&self,
+                                                                access_token: &AccessToken,
+                                                                name: N,
+                                                                scopes: SV,
+                                                                request_limit: Option<usize>)
+                                                                -> Result<ClientInfo> {
         if access_token.scopes().any(|s| s == &Scope::Admin) && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let mut scopes_vec = Vec::with_capacity(scopes.len());
-            scopes_vec.clone_from_slice(scopes);
             let dto = CreateClientDTO {
-                name: String::from(name.as_ref()),
-                scopes: scopes_vec,
+                name: name.into(),
+                scopes: scopes.into(),
                 request_limit: request_limit,
             };
             let mut response = self.send_request(Method::Post,

@@ -146,17 +146,17 @@ impl Client {
 
 
     /// Sets the users username
-    pub fn set_username<S: AsRef<str>>(&self,
-                                       access_token: &AccessToken,
-                                       user_id: u64,
-                                       username: S)
-                                       -> Result<()> {
+    pub fn set_username<U: Into<String>>(&self,
+                                         access_token: &AccessToken,
+                                         user_id: u64,
+                                         username: U)
+                                         -> Result<()> {
         if (access_token.is_user(user_id) || access_token.is_admin()) &&
            !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let dto = UpdateUserDTO {
-                new_username: Some(String::from(username.as_ref())),
+                new_username: Some(username.into()),
                 new_email: None,
                 new_first: None,
                 new_last: None,
@@ -180,11 +180,11 @@ impl Client {
     }
 
     /// Sets the users phone
-    pub fn set_phone<S: AsRef<str>>(&self,
-                                    access_token: &AccessToken,
-                                    user_id: u64,
-                                    phone: S)
-                                    -> Result<()> {
+    pub fn set_phone<P: Into<String>>(&self,
+                                      access_token: &AccessToken,
+                                      user_id: u64,
+                                      phone: P)
+                                      -> Result<()> {
         if (access_token.is_user(user_id) || access_token.is_admin()) &&
            !access_token.has_expired() {
             let mut headers = Headers::new();
@@ -196,7 +196,7 @@ impl Client {
                 new_last: None,
                 old_password: None,
                 new_password: None,
-                new_phone: Some(String::from(phone.as_ref())),
+                new_phone: Some(phone.into()),
                 new_birthday: None,
                 new_image: None,
                 new_address: None,
@@ -248,12 +248,12 @@ impl Client {
     }
 
     /// Sets the users first and last name
-    pub fn set_name<S: AsRef<str>>(&self,
-                                   access_token: &AccessToken,
-                                   user_id: u64,
-                                   first: S,
-                                   last: S)
-                                   -> Result<()> {
+    pub fn set_name<F: Into<String>, L: Into<String>>(&self,
+                                                      access_token: &AccessToken,
+                                                      user_id: u64,
+                                                      first: F,
+                                                      last: L)
+                                                      -> Result<()> {
         if (access_token.is_user(user_id) || access_token.is_admin()) &&
            !access_token.has_expired() {
             let mut headers = Headers::new();
@@ -261,8 +261,8 @@ impl Client {
             let dto = UpdateUserDTO {
                 new_username: None,
                 new_email: None,
-                new_first: Some(String::from(first.as_ref())),
-                new_last: Some(String::from(last.as_ref())),
+                new_first: Some(first.into()),
+                new_last: Some(last.into()),
                 old_password: None,
                 new_password: None,
                 new_phone: None,
@@ -283,18 +283,18 @@ impl Client {
     }
 
     /// Sets the users email
-    pub fn set_email<S: AsRef<str>>(&self,
-                                    access_token: &AccessToken,
-                                    user_id: u64,
-                                    email: S)
-                                    -> Result<()> {
+    pub fn set_email<E: Into<String>>(&self,
+                                      access_token: &AccessToken,
+                                      user_id: u64,
+                                      email: E)
+                                      -> Result<()> {
         if (access_token.is_user(user_id) || access_token.is_admin()) &&
            !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let dto = UpdateUserDTO {
                 new_username: None,
-                new_email: Some(String::from(email.as_ref())),
+                new_email: Some(email.into()),
                 new_first: None,
                 new_last: None,
                 old_password: None,
@@ -317,11 +317,11 @@ impl Client {
     }
 
     /// Sets the users profile picture to the given URL
-    pub fn set_image<S: AsRef<str>>(&self,
-                                    access_token: &AccessToken,
-                                    user_id: u64,
-                                    image_url: S)
-                                    -> Result<()> {
+    pub fn set_image<I: Into<String>>(&self,
+                                      access_token: &AccessToken,
+                                      user_id: u64,
+                                      image_url: I)
+                                      -> Result<()> {
         if (access_token.is_user(user_id) || access_token.is_admin()) &&
            !access_token.has_expired() {
             let mut headers = Headers::new();
@@ -335,7 +335,7 @@ impl Client {
                 new_password: None,
                 new_phone: None,
                 new_birthday: None,
-                new_image: Some(String::from(image_url.as_ref())),
+                new_image: Some(image_url.into()),
                 new_address: None,
             };
             let _ = self.send_request(Method::Post,
@@ -385,11 +385,11 @@ impl Client {
     }
 
     /// Sets the user password
-    pub fn set_password<S: AsRef<str>>(&self,
-                                       access_token: &AccessToken,
-                                       old_password: S,
-                                       new_password: S)
-                                       -> Result<()> {
+    pub fn set_password<O: Into<String>, N: Into<String>>(&self,
+                                                          access_token: &AccessToken,
+                                                          old_password: O,
+                                                          new_password: N)
+                                                          -> Result<()> {
         let user_id = access_token.get_user_id();
         if user_id.is_some() && !access_token.has_expired() {
             let mut headers = Headers::new();
@@ -399,8 +399,8 @@ impl Client {
                 new_email: None,
                 new_first: None,
                 new_last: None,
-                old_password: Some(String::from(old_password.as_ref())),
-                new_password: Some(String::from(new_password.as_ref())),
+                old_password: Some(old_password.into()),
+                new_password: Some(new_password.into()),
                 new_phone: None,
                 new_birthday: None,
                 new_image: None,
@@ -421,12 +421,12 @@ impl Client {
     ///
     /// It will panic if the `include_me` or `include_friends` variables are set and the token is
     /// not an user scoped token.
-    pub fn search_user_random<S: AsRef<str>>(&self,
-                                             access_token: &AccessToken,
-                                             random: S,
-                                             include_me: bool,
-                                             include_friends: bool)
-                                             -> Result<Vec<Profile>> {
+    pub fn search_user_random<R: Into<String>>(&self,
+                                               access_token: &AccessToken,
+                                               random: R,
+                                               include_me: bool,
+                                               include_friends: bool)
+                                               -> Result<Vec<Profile>> {
         let user_id = access_token.get_user_id();
         if (access_token.is_public() || user_id.is_some()) && !access_token.has_expired() {
             if (include_me || include_friends) && user_id.is_none() {
@@ -436,7 +436,7 @@ impl Client {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let dto = SearchUserDTO {
-                random: Some(String::from(random.as_ref())),
+                random: Some(random.into()),
                 username: None,
                 email: None,
                 first_name: None,
