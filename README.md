@@ -1,5 +1,7 @@
 # Fractal Global Credits API client
-[![Build Status](https://travis-ci.org/FractalGlobal/api-rs.svg?branch=master)](https://travis-ci.org/FractalGlobal/api-rs) [![Build status](https://ci.appveyor.com/api/projects/status/areyql6g96l6kyuu?svg=true)](https://ci.appveyor.com/project/Razican/api-rs) [![Coverage Status](https://coveralls.io/repos/github/FractalGlobal/api-rs/badge.svg?branch=master)](https://coveralls.io/github/FractalGlobal/api-rs?branch=master) [![Crates.io](https://meritbadge.herokuapp.com/fractal-dto)](https://crates.io/crates/fractal-api)
+[![Build Status](https://travis-ci.org/FractalGlobal/api-rs.svg?branch=master)](https://travis-ci.org/FractalGlobal/api-rs)
+[![Coverage Status](https://coveralls.io/repos/github/FractalGlobal/api-rs/badge.svg?branch=master)](https://coveralls.io/github/FractalGlobal/api-rs?branch=master)
+[![Crates.io](https://meritbadge.herokuapp.com/fractal-dto)](https://crates.io/crates/fractal-api)
 
 [Documentation] (http://fractal.global/api-rs)
 
