@@ -26,6 +26,12 @@ before_script:
       pip install git+https://github.com/FractalGlobal/travis-cargo.git@fix-coveralls --user &&
       export PATH=$HOME/.local/bin:$PATH
       fi
+  - |
+      if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      export OPENSSL_INCLUDE_DIR=`brew --prefix openssl`/include;
+      export OPENSSL_LIB_DIR=`brew --prefix openssl`/lib;
+      export DEP_OPENSSL_INCLUDE=`brew --prefix openssl`/include;
+      fi
 # The main build
 script:
   - |
