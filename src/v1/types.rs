@@ -2,7 +2,7 @@
 //!
 //! This module contains all the types required by the API to enable an easier use of it.
 
-use std::collections::{btree_set, BTreeSet, hash_map, HashMap};
+use std::collections::{btree_set, BTreeSet};
 use std::slice::Iter;
 use std::result::Result as StdResult;
 
@@ -197,8 +197,6 @@ pub struct User {
     cold_balance: Amount,
     /// The users pending balance
     pending_balance: Amount,
-    /// The users bonds
-    bonds: HashMap<DateTime<UTC>, u64>,
     /// the users date of birth
     birthday: Option<(NaiveDate, bool)>,
     /// the user's phone #
@@ -302,11 +300,6 @@ impl User {
     /// Gets the pending balance of the user.
     pub fn get_pending_balance(&self) -> Amount {
         self.pending_balance
-    }
-
-    /// Gets the bonds purchased by the user.
-    pub fn bonds(&self) -> hash_map::Iter<DateTime<UTC>, u64> {
-        self.bonds.iter()
     }
 
     /// Gets the birthday of the user, if it has been set.
@@ -439,14 +432,6 @@ impl json::ToJson for User {
         let _ = object.insert(String::from("checking_balance"),
                               self.checking_balance.to_json());
         let _ = object.insert(String::from("cold_balance"), self.cold_balance.to_json());
-        let mut bonds_map = Vec::new();
-        for (time, count) in self.bonds.iter() {
-            let mut object = json::Object::new();
-            let _ = object.insert(String::from("timestamp"), time_to_json(*time));
-            let _ = object.insert(String::from("count"), count.to_json());
-            bonds_map.push(json::Json::Object(object));
-        }
-        let _ = object.insert(String::from("bonds"), bonds_map.to_json());
         match self.birthday {
             Some((ref b, c)) => {
                 let _ = object.insert(String::from("birthday"), date_to_json(*b));
@@ -540,7 +525,6 @@ impl FromDTO<UserDTO> for User {
             wallet_addresses: dto.wallet_addresses,
             checking_balance: dto.checking_balance,
             cold_balance: dto.cold_balance,
-            bonds: dto.bonds,
             birthday: birthday_opt,
             phone: phone_opt,
             image_url: dto.image_url,
