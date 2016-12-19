@@ -118,21 +118,18 @@ impl Client {
 
     /// Checks if the given wallet address is a valid wallet address and returns its associated
     /// user id
-    pub fn get_user_id_from_wallet_address<S: AsRef<str>>(&self,
-                                                          access_token: &AccessToken,
-                                                          wallet_address: S)
-                                                          -> Result<u64> {
+    pub fn get_user_id_from_wallet_address(&self,
+                                           access_token: &AccessToken,
+                                           wallet_address: WalletAddress)
+                                           -> Result<u64> {
         let user_id = access_token.get_user_id();
         if user_id.is_some() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let mut response = self.send_request(Method::Post,
-                              format!("{}check_wallet_address/{}",
-                                      self.url,
-                                      wallet_address.as_ref()),
+                              format!("{}check_wallet_address/{}", self.url, wallet_address),
                               headers,
                               None::<&VoidDTO>)?;
-
             let mut response_str = String::new();
             let _ = response.read_to_string(&mut response_str)?;
             let res: ResponseDTO = json::decode(&response_str)?;
