@@ -33,6 +33,39 @@ impl Client {
         }
     }
 
+    /// Resends the unsubscribe email confirmation
+    pub fn unsubscribe_email_confirmation(&self, access_token: &AccessToken) -> Result<()> {
+        if access_token.get_user_id().is_some() && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let _ = self.send_request(Method::Get,
+                              format!("{}unsubscribe_email_confirmation", self.url),
+                              headers,
+                              None::<&VoidDTO>)?;
+            Ok(())
+        } else {
+            Err(Error::Forbidden(String::from("the token must be an unexpired user token")))
+        }
+    }
+
+    /// Get the unlogged user profile
+    pub fn get_unlogged_user(&self, access_token: &AccessToken, user_id: u64) -> Result<User> {
+        let logged_user_id = access_token.get_user_id();
+        if logged_user_id.is_some() && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let mut response = self.send_request(Method::Get,
+                              format!("{}get_unlogged_user/{}", self.url, user_id),
+                              headers,
+                              None::<&VoidDTO>)?;
+            let mut response_str = String::new();
+            let _ = response.read_to_string(&mut response_str)?;
+            Ok(User::from_dto(json::decode::<UserDTO>(&response_str)?)?)
+        } else {
+            Err(Error::Forbidden(String::from("the token must be an unexpired user token")))
+        }
+    }
+
     /// Get the user
     pub fn get_user(&self, access_token: &AccessToken, user_id: u64) -> Result<User> {
         if (access_token.is_user(user_id) || access_token.is_admin()) &&

@@ -89,6 +89,24 @@ impl Client {
         }
     }
 
+    /// unConfirms the users email
+    pub fn unconfirm_email<S: AsRef<str>>(&self,
+                                        access_token: &AccessToken,
+                                        email_key: S)
+                                        -> Result<()> {
+        if access_token.is_public() && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let _ = self.send_request(Method::Post,
+                              format!("{}unconfirm_email/{}", self.url, email_key.as_ref()),
+                              headers,
+                              None::<&VoidDTO>)?;
+            Ok(())
+        } else {
+            Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
+        }
+    }
+
     /// Begins a the reset password procecss
     pub fn start_reset_password<U: Into<String>, E: Into<String>>(&self,
                                                                   access_token: &AccessToken,
