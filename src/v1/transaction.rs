@@ -91,6 +91,29 @@ impl Client {
         }
     }
 
+    /// Gets all the user transactions for the userId
+    pub fn get_user_transactions(&self,
+                                access_token: &AccessToken,
+                                user_id: u64)
+                                -> Result<Vec<Transaction>> {
+        if access_token.is_user(user_id) && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let mut response = self.send_request(Method::Get,
+                              format!("{}transactions_summary/{}", self.url, user_id),
+                              headers,
+                              None::<&VoidDTO>)?;
+            let mut response_str = String::new();
+            let _ = response.read_to_string(&mut response_str)?;
+            let transactions: Vec<TransactionDTO> = json::decode(&response_str)?;
+            Ok(transactions.into_iter()
+                .map(|t| Transaction::from_dto(t).unwrap())
+                .collect())
+        } else {
+            Err(Error::Forbidden(String::from("the token must be an unexpired user token")))
+        }
+    }
+
     /// Authenticates the pending transaction
     pub fn authenticate_transaction<S: AsRef<str>>(&self,
                                                    access_token: &AccessToken,
