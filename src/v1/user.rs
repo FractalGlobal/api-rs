@@ -501,4 +501,18 @@ impl Client {
                                                token")))
         }
     }
+    ///sends address confirmation
+    pub fn send_address_confirmation(&self, access_token: &AccessToken) -> Result<()> {
+        if access_token.get_user_id().is_some() && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let _ = self.send_request(Method::Get,
+                              format!("{}send_address_confirmation", self.url),
+                              headers,
+                              None::<&VoidDTO>)?;
+            Ok(())
+        } else {
+            Err(Error::Forbidden(String::from("the token must be an unexpired user token")))
+        }
+    }
 }
