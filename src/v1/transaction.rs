@@ -2,6 +2,7 @@ use std::io::Read;
 use std::str::FromStr;
 use hyper::method::Method;
 use hyper::header::{Headers, Authorization};
+use hyper::status::StatusCode;
 use rustc_serialize::json;
 
 use utils::{WalletAddress, Amount};
@@ -62,7 +63,14 @@ impl Client {
                               Some(&dto))?;
             let mut response_str = String::new();
             let _ = response.read_to_string(&mut response_str)?;
-            Ok(json::decode::<PendingTransactionDTO>(&response_str)?.code)
+            match response.status {
+                StatusCode::Ok => {
+                    Ok(json::decode::<PendingTransactionDTO>(&response_str)?.code)
+                }
+                _ => {
+                    Err(Error::Forbidden(json::decode::<ResponseDTO>(&response_str)?.message))
+                }
+            }   
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired user  token")))
         }
