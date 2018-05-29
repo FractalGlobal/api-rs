@@ -515,4 +515,44 @@ impl Client {
             Err(Error::Forbidden(String::from("the token must be an unexpired user token")))
         }
     }
+
+    ///initiates user verification
+    pub fn initiate_user_verification(&self, access_token: &AccessToken) -> Result<()> {
+        if access_token.get_user_id().is_some() && !access_token.has_expired() {
+             match access_token.get_user_id() {
+                Some(id) => {
+                    let mut headers = Headers::new();
+                    headers.set(Authorization(access_token.get_token()));
+                    let _ = self.send_request(Method::Post,
+                                    format!("{}initiate_user_verification/{}", self.url, id),
+                                    headers,
+                                    None::<&VoidDTO>)?;
+                    Ok(())
+                }
+                None => {
+                    Err(Error::Forbidden(String::from("invalid user")))
+                }
+            }
+        } else {
+            Err(Error::Forbidden(String::from("the token must be an unexpired user token")))
+        }
+    }
+
+    /// Generates a new authenticator code, and returns the URL.
+    pub fn get_user_verification_status(&self, access_token: &AccessToken) -> Result<String> {
+        if access_token.get_user_id().is_some() && !access_token.has_expired() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let mut response = self.send_request(Method::Get,
+                              format!("{}get_user_verification_status/{}", self.url, access_token.get_user_id().unwrap()),
+                              headers,
+                              None::<&VoidDTO>)?;
+            let mut response_str = String::new();
+            let _ = response.read_to_string(&mut response_str)?;
+            Ok(json::decode::<ResponseDTO>(&response_str)?.message)
+        } else {
+            Err(Error::Forbidden(String::from("the token must be an unexpired user token")))
+        }
+    }
+
 }
