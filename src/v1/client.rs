@@ -1,4 +1,4 @@
-use std::time::Duration;
+//use std::time::Duration;
 
 use hyper::Client as HyperClient;
 
@@ -22,15 +22,15 @@ impl Client {
         }
     }
 
-    /// Sets the read timeout for requests.
-    pub fn set_read_timeout(&mut self, timeout: Option<Duration>) {
-        self.client.set_read_timeout(timeout);
-    }
+    // /// Sets the read timeout for requests.
+    // pub fn set_read_timeout(&mut self, timeout: Option<Duration>) {
+    //     self.client.set_read_timeout(timeout);
+    // }
 
-    /// Sets the write timeout for requests.
-    pub fn set_write_timeout(&mut self, timeout: Option<Duration>) {
-        self.client.set_write_timeout(timeout);
-    }
+    // /// Sets the write timeout for requests.
+    // pub fn set_write_timeout(&mut self, timeout: Option<Duration>) {
+    //     self.client.set_write_timeout(timeout);
+    // }
 }
 
 impl Default for Client {
