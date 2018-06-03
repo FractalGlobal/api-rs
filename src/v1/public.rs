@@ -110,14 +110,12 @@ impl Client {
     /// Begins a the reset password procecss
     pub fn start_reset_password<U: Into<String>, E: Into<String>>(&self,
                                                                   access_token: &AccessToken,
-                                                                  username: U,
                                                                   email: E)
                                                                   -> Result<()> {
         if access_token.is_public() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let dto = ResetPasswordDTO {
-                username: username.into(),
                 email: email.into(),
             };
             let _ = self.send_request(Method::Post,
