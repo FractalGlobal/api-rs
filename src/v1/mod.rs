@@ -45,8 +45,8 @@ impl Client {
                                            url: S,
                                            mut headers: Headers,
                                            dto: Option<&D>)
-                                           -> Result<Response> {
-
+                                           -> Result<Response> {    
+        
         headers.set(Accept(vec![qitem(Mime(TopLevel::Application,
                                            SubLevel::Json,
                                            vec![(Attr::Charset, Value::Utf8)]))]));
@@ -60,19 +60,26 @@ impl Client {
         if let Some(ref b) = body {
             response = response.body(b);
         }
-        let response = response.send();
-        let mut response = if response.is_err() {
-            let mut response = self.client
-                .request(method, url.as_ref())
+        let mut response_main = response.send();
+        let mut bad_status = false;
+        let mut response = if response_main.is_err() {
+            while !bad_status {
+                let mut response = self.client
+                .request(method.clone(), url.as_ref())
                 .headers(headers.clone());
-            if let Some(ref b) = body {
-                response = response.body(b);
+                if let Some(ref b) = body {
+                    response = response.body(b);
+                }
+                response_main = response.send();
+                if !response_main.is_err() {
+                    bad_status = true;
+                }
             }
-            response.send()
+            response_main
         } else {
-            response
+            response_main
         }?;
-
+           
         match response.status {
             StatusCode::Ok => Ok(response),
             status => {
@@ -96,7 +103,7 @@ impl Client {
                         let response_dto: ResponseDTO = json::decode(&response_str)?;
                         Err(Error::NotFound(response_dto.message))
                     }
-                    _ => {
+                    _ => {                      
                         let response_dto: ResponseDTO = json::decode(&response_str)?;
                         Err(Error::Server(response_dto.message))
                     }

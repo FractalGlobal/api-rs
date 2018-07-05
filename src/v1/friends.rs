@@ -4,9 +4,9 @@ use hyper::method::Method;
 use hyper::header::{Headers, Authorization};
 use rustc_serialize::json;
 
-use dto::{FromDTO, PendingFriendRequestDTO, FriendRequestDTO, ConfirmFriendRequestDTO, ProfileDTO,
+use dto::{ResponseDTO,FromDTO, PendingFriendRequestDTO, FriendRequestDTO, ConfirmFriendRequestDTO, ProfileDTO,
           RelationshipDTO as Relationship};
-
+use hyper::status::StatusCode;
 use error::{Result, Error};
 use super::{Client, VoidDTO};
 use super::types::{PendingFriendRequest, Profile};
@@ -21,7 +21,7 @@ impl Client {
                                                 user: u64,
                                                 relation: Relationship,
                                                 message: Option<M>)
-                                                -> Result<()> {
+                                                -> Result<(ResponseDTO)> {
         let user_id = access_token.get_user_id();
         if user_id.is_some() && !access_token.has_expired() {
             let mut headers = Headers::new();
@@ -32,11 +32,24 @@ impl Client {
                 relationship: relation,
                 message: message.and_then(|mess| Some(mess.into())),
             };
-            let _ = self.send_request(Method::Post,
+            let mut response = self.send_request(Method::Post,
                               format!("{}create_friend_request", self.url),
                               headers,
                               Some(&dto))?;
-            Ok(())
+            let mut response_str = String::new();
+            let _ = response.read_to_string(&mut response_str)?;
+            let res: ResponseDTO = json::decode(&response_str)?;
+            match response.status {
+                StatusCode::Ok => {
+                    Ok(res)
+                }
+                StatusCode::Accepted => {
+                    Ok(res)
+                }
+                _ => {
+                    Err(Error::Forbidden(json::decode::<ResponseDTO>(&response_str)?.message))
+                }
+            }
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired user token")))
         }
@@ -47,7 +60,7 @@ impl Client {
                                   access_token: &AccessToken,
                                   request_id: u64,
                                   user: u64)
-                                  -> Result<()> {
+                                  -> Result<(ResponseDTO)> {
         let user_id = access_token.get_user_id();
         if user_id.is_some() && !access_token.has_expired() {
             let mut headers = Headers::new();
@@ -57,13 +70,23 @@ impl Client {
                 origin: user,
                 destination: user_id.unwrap(),
             };
-            let _ = self.send_request(Method::Post,
+            let mut response = self.send_request(Method::Post,
                               format!("{}confirm_friend_request",
                                    self.url,
                                   ),
                               headers,
                               Some(&dto))?;
-            Ok(())
+            let mut response_str = String::new();
+            let _ = response.read_to_string(&mut response_str)?;
+            match response.status {
+                StatusCode::Ok => {
+                    let res: ResponseDTO = json::decode(&response_str)?;
+                    Ok(res)
+                }
+                _ => {
+                    Err(Error::Forbidden(json::decode::<ResponseDTO>(&response_str)?.message))
+                }
+            }
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired user token")))
         }
@@ -119,23 +142,34 @@ impl Client {
     }
 
     /// Rejects the friend request for the given user
-    pub fn reject_friend_request(&self, access_token: &AccessToken, request_id: u64) -> Result<()> {
+    pub fn reject_friend_request(&self, access_token: &AccessToken, request_id: u64) 
+                                -> Result<(ResponseDTO)> {
 
         if access_token.get_user_id().is_some() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let _ = self.send_request(Method::Post,
+            let mut response = self.send_request(Method::Post,
                               format!("{}reject_friend_request/{}", self.url, request_id),
                               headers,
                               None::<&VoidDTO>)?;
-            Ok(())
+            let mut response_str = String::new();
+            let _ = response.read_to_string(&mut response_str)?;
+            match response.status {
+                StatusCode::Ok => {
+                    let res: ResponseDTO = json::decode(&response_str)?;
+                    Ok(res)
+                }
+                _ => {
+                    Err(Error::Forbidden(json::decode::<ResponseDTO>(&response_str)?.message))
+                }
+            }
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired user or admin \
                                                token, and in the case of an user token, the ID \
                                                in the token must be the same as the given ID")))
         }
     }
-
+    
     /// Unfriends the given user
     pub fn unfriend(&self, access_token: &AccessToken, request_id: u64) -> Result<()> {
 

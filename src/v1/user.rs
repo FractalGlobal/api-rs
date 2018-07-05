@@ -8,7 +8,7 @@ use chrono::NaiveDate;
 use utils::Address;
 use dto::{FromDTO, UserDTO, ProfileDTO, AuthenticationCodeDTO, ResponseDTO, UpdateUserDTO,
           SearchUserDTO};
-
+use hyper::status::StatusCode;
 use super::{Client, VoidDTO};
 use error::{Result, Error};
 use super::types::{User, Profile};
@@ -517,20 +517,23 @@ impl Client {
     }
 
     ///initiates user verification
-    pub fn initiate_user_verification(&self, access_token: &AccessToken) -> Result<()> {
+    pub fn initiate_user_verification(&self, access_token: &AccessToken) -> Result<(ResponseDTO)> {
         if access_token.get_user_id().is_some() && !access_token.has_expired() {
-             match access_token.get_user_id() {
-                Some(id) => {
-                    let mut headers = Headers::new();
-                    headers.set(Authorization(access_token.get_token()));
-                    let _ = self.send_request(Method::Post,
-                                    format!("{}initiate_user_verification/{}", self.url, id),
-                                    headers,
-                                    None::<&VoidDTO>)?;
-                    Ok(())
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let mut response = self.send_request(Method::Post,
+                            format!("{}initiate_user_verification", self.url),
+                            headers,
+                            None::<&VoidDTO>)?;
+            let mut response_str = String::new();
+            let _ = response.read_to_string(&mut response_str)?;
+            let res: ResponseDTO = json::decode(&response_str)?;
+            match response.status {
+                StatusCode::Ok => {
+                    Ok(res)
                 }
-                None => {
-                    Err(Error::Forbidden(String::from("invalid user")))
+                _ => {
+                    Err(Error::Forbidden(json::decode::<ResponseDTO>(&response_str)?.message))
                 }
             }
         } else {
