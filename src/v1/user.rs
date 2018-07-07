@@ -19,15 +19,25 @@ use super::oauth::AccessToken;
 /// This are the user getters, setters and creators for the client.
 impl Client {
     /// Resends the email confirmation
-    pub fn resend_email_confirmation(&self, access_token: &AccessToken) -> Result<()> {
+    pub fn resend_email_confirmation(&self, access_token: &AccessToken) -> Result<(ResponseDTO)> {
         if access_token.get_user_id().is_some() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let _ = self.send_request(Method::Get,
+            let mut response = self.send_request(Method::Get,
                               format!("{}resend_email_confirmation", self.url),
                               headers,
                               None::<&VoidDTO>)?;
-            Ok(())
+            let mut response_str = String::new();
+            let _ = response.read_to_string(&mut response_str)?;
+            match response.status {
+                StatusCode::Ok => {
+                    let res: ResponseDTO = json::decode(&response_str)?;
+                    Ok(res)
+                }
+                _ => {
+                    Err(Error::Forbidden(json::decode::<ResponseDTO>(&response_str)?.message))
+                }
+            }
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired user token")))
         }
@@ -502,15 +512,25 @@ impl Client {
         }
     }
     ///sends address confirmation
-    pub fn send_address_confirmation(&self, access_token: &AccessToken) -> Result<()> {
+    pub fn send_address_confirmation(&self, access_token: &AccessToken) -> Result<(ResponseDTO)> {
         if access_token.get_user_id().is_some() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let _ = self.send_request(Method::Get,
+            let mut response = self.send_request(Method::Get,
                               format!("{}send_address_confirmation", self.url),
                               headers,
                               None::<&VoidDTO>)?;
-            Ok(())
+            let mut response_str = String::new();
+            let _ = response.read_to_string(&mut response_str)?;
+            match response.status {
+                StatusCode::Ok => {
+                    let res: ResponseDTO = json::decode(&response_str)?;
+                    Ok(res)
+                }
+                _ => {
+                    Err(Error::Forbidden(json::decode::<ResponseDTO>(&response_str)?.message))
+                }
+            }
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired user token")))
         }
