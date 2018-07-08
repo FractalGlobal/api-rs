@@ -33,7 +33,21 @@ impl Client {
             let mut response_str = String::new();
             let _ = response.read_to_string(&mut response_str)?;
             let transaction: TransactionDTO = json::decode(&response_str)?;
-            Ok(Transaction::from_dto(transaction)?)
+            match response.status {
+                StatusCode::Ok => {
+                    Ok(Transaction::from_dto(transaction)?)
+                }
+                StatusCode::Accepted => {
+                    Err(Error::Accepted(json::decode::<ResponseDTO>(&response_str)?.message))
+                }
+                StatusCode::Unauthorized => {
+                    Err(Error::Unauthorized(json::decode::<ResponseDTO>(&response_str)?.message))
+                }
+                _ => {
+                    Err(Error::Forbidden(json::decode::<ResponseDTO>(&response_str)?.message))
+                }
+            } 
+            //Ok(Transaction::from_dto(transaction)?)
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired admin or user \
                                                token")))
@@ -82,7 +96,7 @@ impl Client {
                                 first_transaction: u64)
                                 -> Result<Vec<Transaction>> {
         if access_token.is_admin() && !access_token.has_expired() {
-            let mut headers = Headers::new();
+                        let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let mut response = self.send_request(Method::Get,
                               format!("{}all_transactions/{}", self.url, first_transaction),
@@ -127,20 +141,33 @@ impl Client {
                                                    access_token: &AccessToken,
                                                    transaction_key: S,
                                                    code: u32)
-                                                   -> Result<()> {
+                                                   -> Result<(String)> {
         let user_id = access_token.get_user_id();
         if user_id.is_some() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let dto = AuthenticationCodeDTO { code: code };
-            let _ = self.send_request(Method::Post,
+            let mut response = self.send_request(Method::Post,
                               format!("{}authenticate_transaction/{}",
                                       self.url,
                                       transaction_key.as_ref()),
                               headers,
                               Some(&dto))?;
-
-            Ok(())
+            
+            let mut response_str = String::new();
+            let _ = response.read_to_string(&mut response_str)?;
+            let res: ResponseDTO = json::decode(&response_str)?;
+            match response.status {
+                StatusCode::Ok => {
+                    Ok(res.message)
+                }
+                StatusCode::Accepted => {
+                    Err(Error::Accepted(res.message))
+                }
+                _ => {
+                    Err(Error::Forbidden(res.message))
+                }
+            }   
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired user token")))
         }
@@ -164,12 +191,12 @@ impl Client {
             let mut response_str = String::new();
             let _ = response.read_to_string(&mut response_str)?;
             let res: ResponseDTO = json::decode(&response_str)?;
-            // unimplemented!()
+    
+
             match u64::from_str(&res.message) {
                 Ok(d) => Ok(d),
-                Err(e) => {
-                    println!("{:?}", e);
-                    Err(Error::BadRequest(String::from("could not parse result to correct type")))
+                Err(_) => {
+                    Err(Error::BadRequest(String::from(res.message)))
                 }
             }
         } else {

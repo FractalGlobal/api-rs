@@ -46,6 +46,10 @@ pub enum Error {
     Transaction,
     /// Connection confirmation error.
     ConfirmConnection,
+    /// Accepted
+    Accepted(String),
+    /// Unauthorized
+    Unauthorized(String),
 }
 
 impl From<HyperError> for Error {
@@ -89,6 +93,8 @@ impl StdError for Error {
             Error::BadRequest(ref e) |
             Error::Client(ref e) |
             Error::NotFound(ref e) |
+            Error::Accepted(ref e) |
+            Error::Unauthorized(ref e) |
             Error::Server(ref e) => e,
             Error::Transaction => "error generating transaction",
             Error::Registration => "error registering user",
@@ -96,6 +102,7 @@ impl StdError for Error {
             Error::InvalidScope => "the provided scope is not a valid scope",
             Error::InvalidSecret => "the provided secret is not a valid secret",
             Error::ConfirmConnection => "error trying to confirm connection",
+           
         }
     }
 
