@@ -44,15 +44,25 @@ impl Client {
     }
 
     /// Resends the unsubscribe email confirmation
-    pub fn unsubscribe_email_confirmation(&self, access_token: &AccessToken) -> Result<()> {
+    pub fn unsubscribe_email_confirmation(&self, access_token: &AccessToken) -> Result<(ResponseDTO)> {
         if access_token.get_user_id().is_some() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let _ = self.send_request(Method::Get,
+            let mut response = self.send_request(Method::Get,
                               format!("{}unsubscribe_email_confirmation", self.url),
                               headers,
                               None::<&VoidDTO>)?;
-            Ok(())
+            let mut response_str = String::new();
+            let _ = response.read_to_string(&mut response_str)?;
+            match response.status {
+                StatusCode::Ok => {
+                    let res: ResponseDTO = json::decode(&response_str)?;
+                    Ok(res)
+                }
+                _ => {
+                    Err(Error::Forbidden(json::decode::<ResponseDTO>(&response_str)?.message))
+                }
+            }
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired user token")))
         }
@@ -227,7 +237,7 @@ impl Client {
                                       access_token: &AccessToken,
                                       user_id: u64,
                                       phone: P)
-                                      -> Result<()> {
+                                      -> Result<(ResponseDTO)> {
         if (access_token.is_user(user_id) || access_token.is_admin()) &&
            !access_token.has_expired() {
             let mut headers = Headers::new();
@@ -244,11 +254,14 @@ impl Client {
                 new_image: None,
                 new_address: None,
             };
-            let _ = self.send_request(Method::Post,
+            let mut response = self.send_request(Method::Post,
                               format!("{}update_user/{}", self.url, user_id),
                               headers,
                               Some(&dto))?;
-            Ok(())
+            let mut response_str = String::new();
+            let _ = response.read_to_string(&mut response_str)?;
+            let res: ResponseDTO = json::decode(&response_str)?;
+            Ok(res)
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired admin or user \
                                                token, and in the case of a user token, the ID \
@@ -261,7 +274,7 @@ impl Client {
                         access_token: &AccessToken,
                         user_id: u64,
                         birthday: NaiveDate)
-                        -> Result<()> {
+                        -> Result<(ResponseDTO)> {
         if (access_token.is_user(user_id) || access_token.is_admin()) &&
            !access_token.has_expired() {
             let mut headers = Headers::new();
@@ -278,11 +291,15 @@ impl Client {
                 new_image: None,
                 new_address: None,
             };
-            let _ = self.send_request(Method::Post,
+            let mut response = self.send_request(Method::Post,
                               format!("{}update_user/{}", self.url, user_id),
                               headers,
                               Some(&dto))?;
-            Ok(())
+            let mut response_str = String::new();
+            let _ = response.read_to_string(&mut response_str)?;
+            let res: ResponseDTO = json::decode(&response_str)?;
+            Ok(res)
+
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired admin or user \
                                                token, and in the case of a user token, the ID \
@@ -296,7 +313,7 @@ impl Client {
                                                       user_id: u64,
                                                       first: F,
                                                       last: L)
-                                                      -> Result<()> {
+                                                      -> Result<(ResponseDTO)> {
         if (access_token.is_user(user_id) || access_token.is_admin()) &&
            !access_token.has_expired() {
             let mut headers = Headers::new();
@@ -313,11 +330,14 @@ impl Client {
                 new_image: None,
                 new_address: None,
             };
-            let _ = self.send_request(Method::Post,
+            let mut response = self.send_request(Method::Post,
                               format!("{}update_user/{}", self.url, user_id),
                               headers,
                               Some(&dto))?;
-            Ok(())
+            let mut response_str = String::new();
+            let _ = response.read_to_string(&mut response_str)?;
+            let res: ResponseDTO = json::decode(&response_str)?;
+            Ok(res)
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired admin or user \
                                                token, and in the case of a user token, the ID \
@@ -330,7 +350,7 @@ impl Client {
                                       access_token: &AccessToken,
                                       user_id: u64,
                                       email: E)
-                                      -> Result<()> {
+                                      -> Result<(ResponseDTO)> {
         if (access_token.is_user(user_id) || access_token.is_admin()) &&
            !access_token.has_expired() {
             let mut headers = Headers::new();
@@ -347,11 +367,14 @@ impl Client {
                 new_image: None,
                 new_address: None,
             };
-            let _ = self.send_request(Method::Post,
+            let mut response = self.send_request(Method::Post,
                               format!("{}update_user/{}", self.url, user_id),
                               headers,
                               Some(&dto))?;
-            Ok(())
+            let mut response_str = String::new();
+            let _ = response.read_to_string(&mut response_str)?;
+            let res: ResponseDTO = json::decode(&response_str)?;
+            Ok(res)
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired admin or user \
                                                token, and in the case of a user token, the ID \
@@ -398,7 +421,7 @@ impl Client {
                        access_token: &AccessToken,
                        user_id: u64,
                        address: Address)
-                       -> Result<()> {
+                       -> Result<(ResponseDTO)> {
         if (access_token.is_user(user_id) || access_token.is_admin()) &&
            !access_token.has_expired() {
             let mut headers = Headers::new();
@@ -415,11 +438,14 @@ impl Client {
                 new_image: None,
                 new_address: Some(address),
             };
-            let _ = self.send_request(Method::Post,
+            let mut response = self.send_request(Method::Post,
                               format!("{}update_user/{}", self.url, user_id),
                               headers,
                               Some(&dto))?;
-            Ok(())
+            let mut response_str = String::new();
+            let _ = response.read_to_string(&mut response_str)?;
+            let res: ResponseDTO = json::decode(&response_str)?;
+            Ok(res)
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired admin or user \
                                                token, and in the case of a user token, the ID \
