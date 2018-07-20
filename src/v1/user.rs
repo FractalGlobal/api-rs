@@ -537,31 +537,7 @@ impl Client {
                                                token")))
         }
     }
-    ///sends address confirmation
-    pub fn send_address_confirmation(&self, access_token: &AccessToken) -> Result<(ResponseDTO)> {
-        if access_token.get_user_id().is_some() && !access_token.has_expired() {
-            let mut headers = Headers::new();
-            headers.set(Authorization(access_token.get_token()));
-            let mut response = self.send_request(Method::Get,
-                              format!("{}send_address_confirmation", self.url),
-                              headers,
-                              None::<&VoidDTO>)?;
-            let mut response_str = String::new();
-            let _ = response.read_to_string(&mut response_str)?;
-            match response.status {
-                StatusCode::Ok => {
-                    let res: ResponseDTO = json::decode(&response_str)?;
-                    Ok(res)
-                }
-                _ => {
-                    Err(Error::Forbidden(json::decode::<ResponseDTO>(&response_str)?.message))
-                }
-            }
-        } else {
-            Err(Error::Forbidden(String::from("the token must be an unexpired user token")))
-        }
-    }
-
+    
     ///initiates user verification
     pub fn initiate_user_verification(&self, access_token: &AccessToken) -> Result<(ResponseDTO)> {
         if access_token.get_user_id().is_some() && !access_token.has_expired() {

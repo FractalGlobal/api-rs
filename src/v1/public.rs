@@ -147,21 +147,4 @@ impl Client {
             Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
         }
     }
-    /// Confirms the users address
-    pub fn confirm_address<S: AsRef<str>>(&self,
-                                        access_token: &AccessToken,
-                                        address_key: S)
-                                        -> Result<()> {
-        if access_token.is_public() && !access_token.has_expired() {
-            let mut headers = Headers::new();
-            headers.set(Authorization(access_token.get_token()));
-            let _ = self.send_request(Method::Post,
-                              format!("{}confirm_address/{}", self.url, address_key.as_ref()),
-                              headers,
-                              None::<&VoidDTO>)?;
-            Ok(())
-        } else {
-            Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
-        }
-    }
 }
