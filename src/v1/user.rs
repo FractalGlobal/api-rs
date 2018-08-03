@@ -539,12 +539,17 @@ impl Client {
     }
     
     ///initiates user verification
-    pub fn initiate_user_verification(&self, access_token: &AccessToken) -> Result<(ResponseDTO)> {
+    pub fn initiate_user_verification(&self, 
+                                        access_token: &AccessToken,
+                                        dfp_value: String) 
+                                        -> Result<(ResponseDTO)> {
         if access_token.get_user_id().is_some() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let mut response = self.send_request(Method::Post,
-                            format!("{}initiate_user_verification", self.url),
+                            format!("{}initiate_user_verification/{}",
+                                    self.url,
+                                    dfp_value),
                             headers,
                             None::<&VoidDTO>)?;
             let mut response_str = String::new();
