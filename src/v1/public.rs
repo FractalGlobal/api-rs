@@ -147,4 +147,62 @@ impl Client {
             Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
         }
     }
+
+
+    ///Subscribe Maililng List
+
+    pub fn subscribe_email <S: AsRef<str>>(&self,
+                                        access_token: &AccessToken,
+                                        email_key: S)
+                                        -> Result<()> {
+        println!("Starting subscribe_email");
+        if access_token.is_public() {
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let _ = self.send_request(Method::Post,
+                              format!("{}subscribe_email/{}", self.url, email_key.as_ref()),
+                              headers,
+                              None::<&VoidDTO>)?;
+                              println!("End subscribe_email");
+            Ok(())
+        } else {
+            Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
+        }
+    }
+    /// Confirms the users subscription
+    pub fn confirm_subscribe_email<S: AsRef<str>>(&self,
+                                        access_token: &AccessToken,
+                                        email_key: S)
+                                        -> Result<()> {
+        if access_token.is_public(){
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let _ = self.send_request(Method::Post,
+                              format!("{}confirm_subscribe_email/{}", self.url, email_key.as_ref()),
+                              headers,
+                              None::<&VoidDTO>)?;
+                              println!("End confirm_subscribe_email");
+            Ok(())
+        } else {
+            Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
+        }
+    }
+
+    /// unConfirms the users subscription
+    pub fn unconfirm_subscribe_email<S: AsRef<str>>(&self,
+                                        access_token: &AccessToken,
+                                        email_key: S)
+                                        -> Result<()> {
+        if access_token.is_public(){
+            let mut headers = Headers::new();
+            headers.set(Authorization(access_token.get_token()));
+            let _ = self.send_request(Method::Post,
+                              format!("{}unconfirm_subscribe_email/{}", self.url, email_key.as_ref()),
+                              headers,
+                              None::<&VoidDTO>)?;
+            Ok(())
+        } else {
+            Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
+        }
+    }
 }
