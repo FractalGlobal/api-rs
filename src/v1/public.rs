@@ -155,7 +155,6 @@ impl Client {
                                         access_token: &AccessToken,
                                         email_key: S)
                                         -> Result<()> {
-        println!("Starting subscribe_email");
         if access_token.is_public() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
@@ -163,7 +162,7 @@ impl Client {
                               format!("{}subscribe_email/{}", self.url, email_key.as_ref()),
                               headers,
                               None::<&VoidDTO>)?;
-                              println!("End subscribe_email");
+                              
             Ok(())
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
@@ -181,7 +180,7 @@ impl Client {
                               format!("{}confirm_subscribe_email/{}", self.url, email_key.as_ref()),
                               headers,
                               None::<&VoidDTO>)?;
-                              println!("End confirm_subscribe_email");
+                              
             Ok(())
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
