@@ -1,10 +1,9 @@
 use std::io::Read;
-
+use hyper::status::StatusCode;
 use hyper::method::Method;
 use hyper::header::{Headers, Authorization};
-use rustc_serialize::json;
-use dto::{FromDTO, LoginDTO, RegisterDTO, ResetPasswordDTO, NewPasswordDTO};
-
+use dto::{LoginDTO, RegisterDTO, ResetPasswordDTO, NewPasswordDTO};
+use hyper::client::response::Response;
 use error::{Result, Error};
 use super::{Client, VoidDTO};
 use super::oauth::AccessToken;
@@ -22,7 +21,7 @@ impl Client {
          password: P,
          email: E,
          referer: Option<R>)
-         -> Result<()> {
+         -> Result<Response> {
         if access_token.is_public() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
@@ -32,11 +31,22 @@ impl Client {
                 email: email.into(),
                 referer: referer.and_then(|pass| Some(pass.into())),
             };
-            let _ = self.send_request(Method::Post,
+            let mut response = self.send_request(Method::Post,
                               format!("{}register", self.url),
                               headers,
                               Some(&dto))?;
-            Ok(())
+            
+            match response.status {
+                StatusCode::Ok => {
+                    Ok(response)
+                }
+                _ => {
+                    let mut response_str = String::new();
+                    let _ = response.read_to_string(&mut response_str)?;
+                    Err(Error::Forbidden(response_str))
+                    
+                }
+            }
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
         }
@@ -50,7 +60,7 @@ impl Client {
                                                     user_email: UM,
                                                     password: P,
                                                     remember_me: bool)
-                                                    -> Result<AccessToken> {
+                                                    -> Result<Response> {
         if access_token.is_public() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
@@ -59,13 +69,25 @@ impl Client {
                 password: password.into(),
                 remember_me: remember_me,
             };
+            //let mut res = Response::new();
             let mut response = self.send_request(Method::Post,
                               format!("{}login", self.url),
                               headers,
                               Some(&dto))?;
-            let mut response_str = String::new();
-            let _ = response.read_to_string(&mut response_str)?;
-            Ok(AccessToken::from_dto(json::decode(&response_str)?)?)
+            match response.status {
+                StatusCode::Ok => {
+                    Ok(response)
+                }
+                _ => {
+                    let mut response_str = String::new();
+                    let _ = response.read_to_string(&mut response_str)?;
+                    Err(Error::Forbidden(response_str))
+                    
+                }
+            }
+            // let mut response_str = String::new();
+            // let _ = response.read_to_string(&mut response_str)?;
+            // Ok(AccessToken::from_dto(json::decode(&response_str)?)?)
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
         }
@@ -75,15 +97,25 @@ impl Client {
     pub fn confirm_email<S: AsRef<str>>(&self,
                                         access_token: &AccessToken,
                                         email_key: S)
-                                        -> Result<()> {
+                                        -> Result<Response> {
         if access_token.is_public() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let _ = self.send_request(Method::Post,
+            let mut response = self.send_request(Method::Post,
                               format!("{}confirm_email/{}", self.url, email_key.as_ref()),
                               headers,
                               None::<&VoidDTO>)?;
-            Ok(())
+            match response.status {
+                StatusCode::Ok => {
+                    Ok(response)
+                }
+                _ => {
+                    let mut response_str = String::new();
+                    let _ = response.read_to_string(&mut response_str)?;
+                    Err(Error::Forbidden(response_str))
+                    
+                }
+            }
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
         }
@@ -93,15 +125,25 @@ impl Client {
     pub fn unconfirm_email<S: AsRef<str>>(&self,
                                         access_token: &AccessToken,
                                         email_key: S)
-                                        -> Result<()> {
+                                        -> Result<Response> {
         if access_token.is_public() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let _ = self.send_request(Method::Post,
+            let mut response = self.send_request(Method::Post,
                               format!("{}unconfirm_email/{}", self.url, email_key.as_ref()),
                               headers,
                               None::<&VoidDTO>)?;
-            Ok(())
+            match response.status {
+                StatusCode::Ok => {
+                    Ok(response)
+                }
+                _ => {
+                    let mut response_str = String::new();
+                    let _ = response.read_to_string(&mut response_str)?;
+                    Err(Error::Forbidden(response_str))
+                    
+                }
+            }
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
         }
@@ -111,18 +153,28 @@ impl Client {
     pub fn start_reset_password<E: Into<String>>(&self,
                                                 access_token: &AccessToken,
                                                 email: E)
-                                                -> Result<()> {
+                                                -> Result<Response> {
         if access_token.is_public() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let dto = ResetPasswordDTO {
                 email: email.into(),
             };
-            let _ = self.send_request(Method::Post,
+            let mut response = self.send_request(Method::Post,
                               format!("{}start_reset_password", self.url),
                               headers,
                               Some(&dto))?;
-            Ok(())
+           match response.status {
+                StatusCode::Ok => {
+                    Ok(response)
+                }
+                _ => {
+                    let mut response_str = String::new();
+                    let _ = response.read_to_string(&mut response_str)?;
+                    Err(Error::Forbidden(response_str))
+                    
+                }
+            }
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
         }
@@ -133,16 +185,26 @@ impl Client {
                                                           access_token: &AccessToken,
                                                           password_key: K,
                                                           new_password: P)
-                                                          -> Result<()> {
+                                                          -> Result<Response> {
         if access_token.is_public() && !access_token.has_expired() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
             let dto = NewPasswordDTO { new_password: new_password.into() };
-            let _ = self.send_request(Method::Post,
+            let mut response = self.send_request(Method::Post,
                               format!("{}reset_password/{}", self.url, password_key.as_ref()),
                               headers,
                               Some(&dto))?;
-            Ok(())
+            match response.status {
+                StatusCode::Ok => {
+                    Ok(response)
+                }
+                _ => {
+                    let mut response_str = String::new();
+                    let _ = response.read_to_string(&mut response_str)?;
+                    Err(Error::Forbidden(response_str))
+                    
+                }
+            }
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
         }
@@ -154,16 +216,26 @@ impl Client {
     pub fn subscribe_email <S: AsRef<str>>(&self,
                                         access_token: &AccessToken,
                                         email_key: S)
-                                        -> Result<()> {
+                                        -> Result<Response> {
         if access_token.is_public() {
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let _ = self.send_request(Method::Post,
+            let mut response = self.send_request(Method::Post,
                               format!("{}subscribe_email/{}", self.url, email_key.as_ref()),
                               headers,
                               None::<&VoidDTO>)?;
                               
-            Ok(())
+            match response.status {
+                StatusCode::Ok => {
+                    Ok(response)
+                }
+                _ => {
+                    let mut response_str = String::new();
+                    let _ = response.read_to_string(&mut response_str)?;
+                    Err(Error::Forbidden(response_str))
+                    
+                }
+            }
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
         }
@@ -172,16 +244,26 @@ impl Client {
     pub fn confirm_subscribe_email<S: AsRef<str>>(&self,
                                         access_token: &AccessToken,
                                         email_key: S)
-                                        -> Result<()> {
+                                        -> Result<Response> {
         if access_token.is_public(){
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let _ = self.send_request(Method::Post,
+            let mut response = self.send_request(Method::Post,
                               format!("{}confirm_subscribe_email/{}", self.url, email_key.as_ref()),
                               headers,
                               None::<&VoidDTO>)?;
                               
-            Ok(())
+            match response.status {
+                StatusCode::Ok => {
+                    Ok(response)
+                }
+                _ => {
+                    let mut response_str = String::new();
+                    let _ = response.read_to_string(&mut response_str)?;
+                    Err(Error::Forbidden(response_str))
+                    
+                }
+            }
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
         }
@@ -191,15 +273,25 @@ impl Client {
     pub fn unconfirm_subscribe_email<S: AsRef<str>>(&self,
                                         access_token: &AccessToken,
                                         email_key: S)
-                                        -> Result<()> {
+                                        -> Result<Response> {
         if access_token.is_public(){
             let mut headers = Headers::new();
             headers.set(Authorization(access_token.get_token()));
-            let _ = self.send_request(Method::Post,
+            let mut response = self.send_request(Method::Post,
                               format!("{}unconfirm_subscribe_email/{}", self.url, email_key.as_ref()),
                               headers,
                               None::<&VoidDTO>)?;
-            Ok(())
+            match response.status {
+                StatusCode::Ok => {
+                    Ok(response)
+                }
+                _ => {
+                    let mut response_str = String::new();
+                    let _ = response.read_to_string(&mut response_str)?;
+                    Err(Error::Forbidden(response_str))
+                    
+                }
+            }
         } else {
             Err(Error::Forbidden(String::from("the token must be an unexpired public token")))
         }
