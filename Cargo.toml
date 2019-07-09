@@ -15,7 +15,7 @@ Fractal Global Credits API client library
 keywords = ["fractal", "global", "credits", "api"]
 
 [dependencies]
-hyper = "^0.6"
+hyper = "0.9.18"
 chrono = { version = "^0.2", features = ["rustc-serialize"]}
 rustc-serialize = "^0.3"
 fractal-utils = "^0.3"
