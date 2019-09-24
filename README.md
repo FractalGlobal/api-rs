@@ -1,11 +1,11 @@
-# Fractal Global Credits API client
+# Frink.global API client
 [![Build Status](https://travis-ci.org/FractalGlobal/api-rs.svg?branch=master)](https://travis-ci.org/FractalGlobal/api-rs)
 [![Coverage Status](https://coveralls.io/repos/github/FractalGlobal/api-rs/badge.svg?branch=master)](https://coveralls.io/github/FractalGlobal/api-rs?branch=master)
 [![Crates.io](https://meritbadge.herokuapp.com/fractal-dto)](https://crates.io/crates/fractal-api)
 
 [Documentation] (http://fractal.global/api-rs)
 
-This library provides a simple API for using the the Fractal Global Credits REST API.
+This library provides a simple API for using the the Frink.global REST API.
 
 Using it is as simple as including this in the crate:
 ```rust
